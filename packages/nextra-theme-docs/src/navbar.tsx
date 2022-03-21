@@ -87,6 +87,10 @@ export default function Navbar({ flatDirectories, items }: NavBarProps) {
           </div>
         </div>
 
+        {config.customHeaderLinks
+          ? renderComponent(config.customHeaderLinks, {})
+          : null}
+
         {config.projectLink || config.github ? (
           <a
             className="text-current p-2"

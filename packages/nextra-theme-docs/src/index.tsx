@@ -157,7 +157,9 @@ const Content: React.FC<LayoutProps> = ({
                   themeContext={themeContext}
                   breadcrumb={
                     activeType === 'page' ? null : themeContext.breadcrumb ? (
-                      <Breadcrumb activePath={activePath} />
+                      config.noBreadcrumbs ? null : (
+                        <Breadcrumb activePath={activePath} />
+                      )
                     ) : null
                   }
                   toc={

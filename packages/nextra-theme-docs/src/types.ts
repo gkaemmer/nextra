@@ -55,4 +55,8 @@ export interface DocsThemeConfig {
         title: string
         meta: Record<string, any>
       }>
+  // BEGIN CUSTOM OSO CONFIGURATION OPTIONS
+  customHeaderLinks?: React.ReactNode | React.FC<{}>
+  noBreadcrumbs?: boolean
+  // END CUSTOM OSO CONFIGURATION OPTIONS
 }
