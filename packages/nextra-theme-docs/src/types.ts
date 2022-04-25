@@ -45,6 +45,10 @@ export interface DocsThemeConfig {
   projectChatLink?: string
   projectChatLinkIcon?: React.FC<{ locale: string }>
   floatTOC?: boolean
+  banner?: React.FC<{ locale: string }>
+  bannerKey?: string
+  gitTimestamp?: string | React.FC<{ locale: string; timestamp: Date }>
+  tocExtraContent?: React.FC<{ locale: string }>
   unstable_faviconGlyph?: string
   unstable_flexsearch?: boolean
   unstable_searchResultEmpty?:

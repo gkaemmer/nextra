@@ -4,6 +4,8 @@ import path from 'path'
 import grayMatter from 'gray-matter'
 import slash from 'slash'
 import { LoaderContext } from 'webpack'
+import { Repository } from '@napi-rs/simple-git'
+
 import { addPage } from './content-dump'
 import { getLocaleFromFilename } from './utils'
 import { compileMdx } from './compile'
@@ -17,14 +19,25 @@ const indexContentEmitted = new Set()
 
 const pagesDir = path.resolve(findPagesDir())
 
-export default async function (
-  this: LoaderContext<LoaderOptions>,
-  source: string,
-  callback: (err?: null | Error, content?: string | Buffer) => void
-) {
-  this.cacheable(true)
+let [repository, gitRoot] = (function () {
+  try {
+    const repo = Repository.discover(process.cwd())
+    // repository.path() returns the `/path/to/repo/.git`, we need the parent directory of it
+    const gitRoot = path.join(repo.path(), '..')
+    return [repo, gitRoot]
+  } catch (e) {
+    console.warn('Init git repository failed', e)
+    return []
+  }
+})()
 
-  const options = this.getOptions()
+async function loader(
+  context: LoaderContext<LoaderOptions>,
+  source: string
+): Promise<string | Buffer> {
+  context.cacheable(true)
+
+  const options = context.getOptions()
   let {
     theme,
     themeConfig,
@@ -35,7 +48,7 @@ export default async function (
     pageMapCache
   } = options
 
-  const { resourcePath } = this
+  const { resourcePath } = context
   const filename = resourcePath.slice(resourcePath.lastIndexOf('/') + 1)
   const fileLocale = getLocaleFromFilename(filename)
 
@@ -64,7 +77,7 @@ export default async function (
   if (!isProductionBuild) {
     // Add the entire directory `pages` as the dependency
     // so we can generate the correct page map.
-    this.addContextDependency(pagesDir)
+    context.addContextDependency(pagesDir)
   } else {
     // We only add meta files as dependencies for prodution build,
     // so we can do incremental builds.
@@ -74,7 +87,7 @@ export default async function (
         meta &&
         (!fileLocale || locale === fileLocale)
       ) {
-        this.addDependency(filePath)
+        context.addDependency(filePath)
       }
     })
   }
@@ -98,10 +111,15 @@ export default async function (
   }
 
   const { result, titleText, headings, hasH1, structurizedData } =
-    await compileMdx(content, mdxOptions, {
-      unstable_staticImage,
-      unstable_flexsearch
-    })
+    await compileMdx(
+      content,
+      mdxOptions,
+      {
+        unstable_staticImage,
+        unstable_flexsearch
+      },
+      resourcePath
+    )
   content = result
   content = content.replace('export default MDXContent;', '')
 
@@ -118,6 +136,32 @@ export default async function (
     }
 
     indexContentEmitted.add(filename)
+  }
+
+  let timestamp: number | undefined
+  if (repository && gitRoot) {
+    if (repository.isShallow()) {
+      if (process.env.VERCEL) {
+        console.warn(
+          `The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.`
+        )
+      } else if (process.env.GITHUB_ACTION) {
+        console.warn(
+          `The repository is shallow cloned, so the latest modified time will not be presented. See https://github.com/actions/checkout#fetch-all-history-for-all-tags-and-branches to fetch all the history.`
+        )
+      } else {
+        console.warn(
+          `The repository is shallow cloned, so the latest modified time will not be presented.`
+        )
+      }
+    }
+    try {
+      timestamp = await repository.getFileLatestModifiedDateAsync(
+        path.relative(gitRoot, resourcePath)
+      )
+    } catch (e) {
+      // Failed to get timestamp for this file. Silently ignore it.
+    }
   }
 
   const prefix =
@@ -142,7 +186,8 @@ export default async function (
       pageMap: __nextra_pageMap__,
       titleText: ${JSON.stringify(titleText)},
       headings: ${JSON.stringify(headings)},
-      hasH1: ${JSON.stringify(hasH1)}
+      hasH1: ${JSON.stringify(hasH1)},
+      ${timestamp ? `timestamp: ${timestamp},\n` : ''}
     }, ${layoutConfig ? '__nextra_layoutConfig__' : 'null'}))
     `
 
@@ -154,5 +199,15 @@ NextraPage.getLayout = NextraLayout.withLayout`
   // console.log(content)
 
   // Add imports and exports to the source
-  return callback(null, prefix + '\n\n' + content + '\n\n' + suffix)
+  return prefix + '\n\n' + content + '\n\n' + suffix
+}
+
+export default function syncLoader(
+  this: LoaderContext<LoaderOptions>,
+  source: string,
+  callback: (err?: null | Error, content?: string | Buffer) => void
+) {
+  loader(this, source)
+    .then(result => callback(null, result))
+    .catch(err => callback(err))
 }

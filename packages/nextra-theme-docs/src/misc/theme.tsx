@@ -10,65 +10,54 @@ import 'intersection-observer'
 
 import { ActiveAnchor, useActiveAnchorSet } from './active-anchor'
 import { MDXProvider } from '@mdx-js/react'
-import Collapse from '../collapse'
 
-// Anchor links
-const HeaderLink = ({
-  tag: Tag,
-  children,
-  context,
-  id,
-  withObserver = true,
-  ...props
-}: {
-  tag: any
-  children: any
-  context: { index: number }
-  id: string
-  withObserver?: boolean
-}) => {
-  const setActiveAnchor = useActiveAnchorSet()
-  const obRef = useRef<HTMLSpanElement>(null)
+import Collapse from '../components/collapse'
 
-  const slug = id
-  const anchor = <span className="subheading-anchor" id={slug} ref={obRef} />
+import { Tabs, Tab } from '../components/tabs'
+import Bleed from '../bleed'
+import Callout from '../callout'
 
-  // We are pretty sure that this header link component will not be rerendered
-  // separately, so we mutable this index property.
-  const index = context.index++
+let observer: IntersectionObserver
+let setActiveAnchor: (
+  value: ActiveAnchor | ((prevState: ActiveAnchor) => ActiveAnchor)
+) => void
+const slugs = new WeakMap()
 
-  useEffect(() => {
-    const ref = obRef
-    const callback = (entries: IntersectionObserverEntry[]) => {
-      let e
-      for (let i = 0; i < entries.length; i++) {
-        if (entries[i].target === ref.current) {
-          e = entries[i]
-          break
+if (typeof window !== 'undefined') {
+  observer =
+    observer! ||
+    new IntersectionObserver(
+      entries => {
+        const headers: [string, number, boolean, boolean][] = []
+
+        for (let i = 0; i < entries.length; i++) {
+          const entry = entries[i]
+          if (entry && entry.rootBounds && slugs.has(entry.target)) {
+            const [slug, index] = slugs.get(entry.target)
+            const aboveHalfViewport =
+              entry.boundingClientRect.y + entry.boundingClientRect.height <=
+              entry.rootBounds.y + entry.rootBounds.height
+            const insideHalfViewport = entry.intersectionRatio > 0
+
+            headers.push([slug, index, aboveHalfViewport, insideHalfViewport])
+          }
         }
-      }
-      if (e) {
-        const aboveHalfViewport =
-          e.boundingClientRect.y + e.boundingClientRect.height <=
-          // FIXME:
-          // @ts-expect-error
-          e.rootBounds.y + e.rootBounds.height
-        const insideHalfViewport = e.intersectionRatio > 0
 
         setActiveAnchor(f => {
-          const ret: ActiveAnchor = {
-            ...f,
-            [slug]: {
-              index,
-              aboveHalfViewport,
-              insideHalfViewport
+          const ret: ActiveAnchor = { ...f }
+
+          for (const header of headers) {
+            ret[header[0]] = {
+              index: header[1],
+              aboveHalfViewport: header[2],
+              insideHalfViewport: header[3]
             }
           }
 
           let activeSlug = ''
           let smallestIndexInViewport = Infinity
           let largestIndexAboveViewport = -1
-          for (let s in f) {
+          for (let s in ret) {
             ret[s].isActive = false
             if (
               ret[s].insideHalfViewport &&
@@ -90,17 +79,47 @@ const HeaderLink = ({
           if (ret[activeSlug]) ret[activeSlug].isActive = true
           return ret
         })
+      },
+      {
+        rootMargin: '0px 0px -50%',
+        threshold: [0, 1]
       }
-    }
+    )
+}
 
-    const observer = new IntersectionObserver(callback, {
-      rootMargin: '0px 0px -50%',
-      threshold: [0, 1]
-    })
+// Anchor links
+const HeaderLink = ({
+  tag: Tag,
+  children,
+  id,
+  context,
+  withObserver = true,
+  ...props
+}: {
+  tag: any
+  children: any
+  id: string
+  context: { index: number }
+  withObserver?: boolean
+}) => {
+  setActiveAnchor = useActiveAnchorSet()
+  const obRef = useRef<HTMLSpanElement>(null)
+
+  const slug = id
+  const anchor = <span className="subheading-anchor" id={slug} ref={obRef} />
+
+  const index = context.index++
+
+  useEffect(() => {
+    const ref = obRef
+    if (!ref.current) return
+
+    slugs.set(ref.current, [slug, index])
     if (ref.current) observer.observe(ref.current)
 
     return () => {
       observer.disconnect()
+      slugs.delete(ref.current!)
       setActiveAnchor(f => {
         const ret: ActiveAnchor = { ...f }
         delete ret[slug]
@@ -109,20 +128,13 @@ const HeaderLink = ({
     }
   }, [])
 
-  // useEffect(() => {
-  //   ;() => {
-  //     setActiveAnchor(f => {
-  //       const ret: ActiveAnchor = { ...f }
-  //       delete ret[slug]
-  //       return ret
-  //     })
-  //   }
-  // }, [])
-
   return (
     <Tag {...props}>
       {anchor}
-      <a href={'#' + slug} className="text-current no-underline no-outline">
+      <a
+        href={'#' + slug}
+        className="anchor text-current no-underline no-outline"
+      >
         {children}
         <span className="anchor-icon" aria-hidden>
           #
@@ -226,12 +238,13 @@ const findSummary = (children: React.ReactNode) => {
   let summary: React.ReactNode = null
   let restChildren: ReactNode[] = []
 
-  React.Children.forEach(children, child => {
+  React.Children.forEach(children, (child, index) => {
     if (child && (child as React.ReactElement).type === Summary) {
       summary = summary || child
     } else {
       let c = child
       if (
+        !summary &&
         typeof child === 'object' &&
         child &&
         (child as React.ReactElement).type !== Details &&
@@ -240,7 +253,11 @@ const findSummary = (children: React.ReactNode) => {
       ) {
         const result = findSummary(child.props.children)
         summary = summary || result[0]
-        c = React.cloneElement(child, { ...child.props, children: result[1] })
+        c = React.cloneElement(child, {
+          ...child.props,
+          children: result[1]?.length ? result[1] : undefined,
+          key: index
+        })
       }
       restChildren.push(c)
     }
@@ -300,7 +317,13 @@ const getComponents = (context: { index: number }) => ({
   a: A,
   table: Table,
   details: Details,
-  summary: Summary
+  summary: Summary,
+  Nextra: {
+    Bleed,
+    Callout,
+    Tabs,
+    Tab
+  }
 })
 
 export const MDXTheme: React.FC<{}> = ({ children }) => {

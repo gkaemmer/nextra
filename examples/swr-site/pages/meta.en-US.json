@@ -17,7 +17,7 @@
     "title": "Examples",
     "type": "page",
     "theme": {
-      "full": true
+      "layout": "full"
     }
   },
   "blog": {
@@ -27,7 +27,8 @@
       "sidebar": false,
       "toc": true,
       "footer": true,
-      "breadcrumb": false
+      "breadcrumb": false,
+      "typesetting": "article"
     }
   },
   "nextra_link": {

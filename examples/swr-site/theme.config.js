@@ -41,6 +41,11 @@ export default {
   },
   feedbackLink: "Question? Give us feedback →",
   feedbackLabels: "feedback",
+  bannerKey: "swr-2",
+  banner: "SWR 2.0 is out! Read more →",
+  tocExtraContent: () => {
+    return <img src="http://placekitten.com/g/300/200" />;
+  },
   logo: () => {
     const { locale } = useRouter();
     return (
@@ -237,4 +242,5 @@ export default {
     { locale: "ko", text: "한국어" },
     { locale: "ru", text: "Русский" },
   ],
+  gitTimestamp: "Last updated on",
 };
