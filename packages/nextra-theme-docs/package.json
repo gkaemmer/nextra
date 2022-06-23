@@ -1,6 +1,6 @@
 {
   "name": "nextra-theme-docs-oso",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Nextra theme for documentation sites. Customized for Oso.",
   "main": "index.js",
   "module": "index.js",
