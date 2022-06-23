@@ -23,6 +23,8 @@ import Breadcrumb from './breadcrumb'
 import renderComponent from './utils/render-component'
 import { PageTheme } from './misc/theme-context'
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 function useDirectoryInfo(pageMap: PageMapItem[]) {
   const { locale, defaultLocale, asPath } = useRouter()
 
@@ -48,7 +50,6 @@ interface BodyProps {
 const Body: React.FC<BodyProps> = ({
   themeContext,
   breadcrumb,
-  toc,
   navLinks,
   timestamp,
   children
@@ -61,13 +62,27 @@ const Body: React.FC<BodyProps> = ({
     <React.Fragment>
       <SkipNavContent />
       {themeContext.layout === 'full' ? (
-        <article
-          className={cn(
-            'nextra-body full relative overflow-x-hidden',
-            !themeContext.sidebar ? 'expand' : ''
-          )}
-        >
+        <article className="nextra-body full relative justify-center overflow-x-hidden pl-[max(env(safe-area-inset-left),1.5rem)] pr-[max(env(safe-area-inset-right),1.5rem)]">
           <MDXTheme>{children}</MDXTheme>
+          {date && config.gitTimestamp ? (
+            <div className="text-xs text-right block text-gray-500 mt-12 mb-8 dark:text-gray-400 pointer-default">
+              {typeof config.gitTimestamp === 'string'
+                ? config.gitTimestamp +
+                  ' ' +
+                  date.toLocaleDateString(locale, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+                : renderComponent(config.gitTimestamp, {
+                    timestamp: date,
+                    locale
+                  })}
+            </div>
+          ) : (
+            <div className="mt-16" />
+          )}
+          {navLinks}
         </article>
       ) : themeContext.layout === 'raw' ? (
         <div className="nextra-body full relative overflow-x-hidden expand">
@@ -76,13 +91,13 @@ const Body: React.FC<BodyProps> = ({
       ) : (
         <article
           className={cn(
-            'nextra-body relative pb-8 w-full max-w-full flex min-w-0 pr-[calc(env(safe-area-inset-right)-1.5rem)]',
+            'nextra-body relative pb-8 w-full justify-center max-w-full flex min-w-0 pr-[calc(env(safe-area-inset-right)-1.5rem)]',
             themeContext.typesetting
               ? 'nextra-body-typesetting-' + themeContext.typesetting
               : ''
           )}
         >
-          <main className="mx-auto max-w-4xl px-6 md:px-8 pt-4 z-10 min-w-0 w-full">
+          <main className="max-w-4xl px-6 md:px-8 pt-4 z-10 min-w-0 w-full">
             {breadcrumb}
             <MDXTheme>{children}</MDXTheme>
             {date && config.gitTimestamp ? (
@@ -105,7 +120,6 @@ const Body: React.FC<BodyProps> = ({
             )}
             {navLinks}
           </main>
-          {toc}
         </article>
       )}
     </React.Fragment>
@@ -116,8 +130,8 @@ interface LayoutProps {
   filename: string
   pageMap: PageMapItem[]
   meta: Record<string, any>
-  titleText: string
-  headings: Heading[]
+  titleText: string | null
+  headings?: Heading[]
   timestamp?: number
 }
 
@@ -159,7 +173,9 @@ const Content: React.FC<LayoutProps> = ({
   const themeContext = { ...activeThemeContext, ...meta }
 
   const hideSidebar = !themeContext.sidebar || themeContext.layout === 'raw'
+  const hideToc = !themeContext.toc || themeContext.layout === 'raw'
 
+  const headingArr = headings ?? []
   return (
     <React.Fragment>
       <Head title={title} locale={locale} meta={meta} />
@@ -184,8 +200,8 @@ const Content: React.FC<LayoutProps> = ({
             />
           ) : null}
           <ActiveAnchor>
-            <div className="max-w-[90rem] w-full mx-auto">
-              <div className="flex flex-1 h-full">
+            <div className="max-w-[90rem] w-full mx-auto flex flex-1 items-stretch">
+              <div className="flex flex-1 w-full">
                 <Sidebar
                   directories={docsDirectories}
                   flatDirectories={flatDirectories}
@@ -193,7 +209,20 @@ const Content: React.FC<LayoutProps> = ({
                   headings={headings}
                   isRTL={isRTL}
                   asPopover={activeType === 'page' || hideSidebar}
+                  includePlaceholder={themeContext.layout === 'default'}
                 />
+                {activeType === 'page' ||
+                hideToc ||
+                themeContext.layout !== 'default' ? (
+                  themeContext.layout === 'full' ? null : (
+                    <div className="nextra-toc w-64 hidden xl:block text-sm px-4 order-last flex-shrink-0" />
+                  )
+                ) : (
+                  <ToC
+                    headings={config.floatTOC ? headingArr : null}
+                    filepathWithName={filepathWithName}
+                  />
+                )}
                 <Body
                   themeContext={themeContext}
                   breadcrumb={
@@ -202,18 +231,6 @@ const Content: React.FC<LayoutProps> = ({
                         <Breadcrumb activePath={activePath} />
                       )
                     ) : null
-                  }
-                  toc={
-                    activeType === 'page' || !themeContext.toc ? (
-                      activeType === 'page' || hideSidebar ? null : (
-                        <div className="nextra-toc w-64 hidden xl:block text-sm px-4" />
-                      )
-                    ) : (
-                      <ToC
-                        headings={config.floatTOC ? headings : null}
-                        filepathWithName={filepathWithName}
-                      />
-                    )
                   }
                   navLinks={
                     activeType === 'page' ? null : themeContext.pagination ? (
@@ -240,55 +257,36 @@ const Content: React.FC<LayoutProps> = ({
   )
 }
 
-// The layout component must be shared globally, we only initialize it once.
-let GlobalLayout: any
-
-export default (opts: PageOpt, _config: DocsThemeConfig) => {
+const createLayout = (opts: PageOpt, _config: DocsThemeConfig) => {
   const extendedConfig = Object.assign({}, defaultConfig, _config)
-  if (!GlobalLayout) {
-    GlobalLayout = function ({
-      children,
-      opts,
-      config
-    }: {
-      opts: any
-      children: any
-      config: DocsThemeConfig & typeof defaultConfig
-    }) {
-      // ;(globalThis as any).__nextra_layout__ = true
-
-      return (
-        <ThemeConfigContext.Provider value={config}>
-          <ThemeProvider
-            attribute="class"
-            disableTransitionOnChange={true}
-            {...{
-              defaultTheme: config.nextThemes.defaultTheme,
-              storageKey: config.nextThemes.storageKey,
-              forcedTheme: config.nextThemes.forcedTheme
-            }}
-          >
-            <Content {...opts}>{children}</Content>
-          </ThemeProvider>
-        </ThemeConfigContext.Provider>
+  let layoutUsed = false
+  const Page = ({ children }: { children: React.ReactChildren }) => {
+    if (!layoutUsed && isProduction) {
+      throw new Error(
+        '[Nextra] Please add the `getLayout` logic to your _app.js, see https://nextjs.org/docs/basic-features/layouts#per-page-layouts.'
       )
     }
-  }
-
-  function Page({ children }: any) {
-    // if (!(globalThis as any).__nextra_layout__) {
-    //   throw new Error(
-    //     '[Nextra] Please add the `getLayout` logic to your _app.js, see https://nextjs.org/docs/basic-features/layouts#per-page-layouts.'
-    //   )
-    // }
     return children
   }
-  Page.withLayout = (page: any) => {
+  Page.getLayout = (page: any) => {
+    layoutUsed = true
     return (
-      <GlobalLayout opts={opts} config={extendedConfig}>
-        {page}
-      </GlobalLayout>
+      <ThemeConfigContext.Provider value={extendedConfig}>
+        <ThemeProvider
+          attribute="class"
+          disableTransitionOnChange={true}
+          {...{
+            defaultTheme: extendedConfig.nextThemes.defaultTheme,
+            storageKey: extendedConfig.nextThemes.storageKey,
+            forcedTheme: extendedConfig.nextThemes.forcedTheme
+          }}
+        >
+          <Content {...opts}>{page}</Content>
+        </ThemeProvider>
+      </ThemeConfigContext.Provider>
     )
   }
   return Page
 }
+
+export default createLayout

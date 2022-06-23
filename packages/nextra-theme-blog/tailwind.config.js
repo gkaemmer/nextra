@@ -2,11 +2,6 @@ const colors = require('tailwindcss/colors')
 module.exports = {
   content: ['./src/**/*.{js,css,tsx}'],
   theme: {
-    fontFamily: {
-      display: [
-        'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
-      ]
-    },
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
@@ -18,7 +13,7 @@ module.exports = {
       red: colors.red,
       orange: colors.orange,
       yellow: colors.yellow,
-      prime: colors.blue
+      primary: colors.blue
     },
     extend: {
       typography: theme => ({
