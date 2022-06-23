@@ -135,7 +135,7 @@ export default function normalizePages({
           if (key !== '*') {
             items.push({
               name: key,
-              route: '',
+              route: '#',
               ...meta[key]
             })
           }
@@ -173,6 +173,11 @@ export default function normalizePages({
     }
 
     const extendedMeta = extendMeta(meta[a.name], fallbackMeta)
+
+    // Oso-specific code: attach isSection to items
+    if (extendedMeta.isSection) {
+      a.isSection = true
+    }
 
     const type = extendedMeta.type || 'doc'
     const title =

@@ -36,10 +36,16 @@ function FolderImpl({ item, anchors }: FolderProps) {
   const activeRouteInside = active || route.startsWith(item.route + '/')
 
   const { defaultMenuCollapsed } = useMenuContext()
-  const open =
+  let open =
     typeof TreeState[item.route] !== 'undefined'
       ? TreeState[item.route]
       : active || activeRouteInside || !defaultMenuCollapsed
+
+  // Oso-specific code: sidebar sections
+  const isSection = (item as any).isSection as boolean
+  if (isSection) {
+    open = true
+  }
 
   const rerender = useState({})[1]
   const { setMenu } = useMenuContext()
@@ -52,7 +58,7 @@ function FolderImpl({ item, anchors }: FolderProps) {
 
   const link = (
     <a
-      className="cursor-pointer"
+      className={`cursor-pointer ${isSection ? 'section' : ''}`}
       onClick={e => {
         const clickedToggleIcon = ['svg', 'path'].includes(
           (e.target as HTMLElement).tagName.toLowerCase()
