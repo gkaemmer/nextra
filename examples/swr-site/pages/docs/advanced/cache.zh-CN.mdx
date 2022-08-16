@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 # 缓存
 
@@ -51,7 +51,7 @@ function App() {
   在上面的例子中，当 `<App/>` 组件重新挂载时，provider 也会被重新创建。缓存 provider 应该放在组件树的更高位置，或者放在渲染之外。
 </Callout>
 
-import { Cache } from 'components/diagrams/cache'
+import { Cache } from '@components/diagrams/cache'
 
 <div className="my-8">
   <Cache/>
@@ -86,7 +86,7 @@ function Avatar() {
 
 当多个 `<SWRConfig>` 组件嵌套时，可以扩展缓存 provider。
 
-`provider` 函数的第一个参数是上层 `<SWRConfig>` 的缓存 provider（如果没有父级 `<SWRConfig>`，则为默认缓存），你可以使用它来扩展缓存 provider：  
+`provider` 函数的第一个参数是上层 `<SWRConfig>` 的缓存 provider（如果没有父级 `<SWRConfig>`，则为默认缓存），你可以使用它来扩展缓存 provider：
 
 ```jsx
 <SWRConfig value={{ provider: (cache) => newCache }}>

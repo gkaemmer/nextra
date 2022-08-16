@@ -1,14 +1,16 @@
-import ReactDOMServer from 'react-dom/server'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  ComponentProps,
+  createContext,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import { MDXProvider } from '@mdx-js/react'
-import Slugger from 'github-slugger'
 import Link from 'next/link'
-import React from 'react'
 import ReactDOM from 'react-dom'
-
-// Anchor links
-
-const SluggerContext = createContext<Slugger | null>(null)
+import { useBlogContext } from './blog-context'
 
 export const HeadingContext = createContext<
   React.RefObject<HTMLHeadingElement | null>
@@ -19,11 +21,14 @@ const useHeadingRef = () => {
   return ref
 }
 
-const H1 = ({ children }: { children?: React.ReactNode }) => {
+const H1 = ({ children }: { children?: ReactNode }): ReactElement => {
   const ref = useHeadingRef()
+  const {
+    opts: { hasJsxInH1 }
+  } = useBlogContext()
   const [showHeading, setShowHeading] = useState(false)
   useEffect(() => {
-    if (ref.current) {
+    if (ref.current && hasJsxInH1) {
       setShowHeading(true)
     }
   }, [])
@@ -31,70 +36,17 @@ const H1 = ({ children }: { children?: React.ReactNode }) => {
     <>{showHeading ? ReactDOM.createPortal(children, ref.current!) : null}</>
   )
 }
+const createHeaderLink =
+  (Tag: `h${2 | 3 | 4 | 5 | 6}`) =>
+  ({ children, id, ...props }: ComponentProps<'h2'>): ReactElement => {
+    return (
+      <Tag className={`subheading-${Tag}`} {...props}>
+        <span className="subheading-anchor -mt-8" id={id} />
+        <a href={`#${id}`}>{children}</a>
+      </Tag>
+    )
+  }
 
-const HeaderLink = ({
-  tag: Tag,
-  children,
-  ...props
-}: {
-  tag: any
-  children: any
-}) => {
-  const slugger = useContext(SluggerContext)
-  // @ts-expect-error safe slugger from context
-  const slug = slugger.slug(ReactDOMServer.renderToStaticMarkup(children))
-  return (
-    <Tag {...props}>
-      <span className="subheading-anchor" id={slug} />
-      <a href={'#' + slug} className="subheading">
-        {children}
-        <span className="anchor-icon" aria-hidden>
-          #
-        </span>
-      </a>
-    </Tag>
-  )
-}
-
-const H2 = ({ children, ...props }: { children?: React.ReactNode }) => {
-  return (
-    <HeaderLink tag="h2" {...props}>
-      {children}
-    </HeaderLink>
-  )
-}
-
-const H3 = ({ children, ...props }: { children?: React.ReactNode }) => {
-  return (
-    <HeaderLink tag="h3" {...props}>
-      {children}
-    </HeaderLink>
-  )
-}
-
-const H4 = ({ children, ...props }: { children?: React.ReactNode }) => {
-  return (
-    <HeaderLink tag="h4" {...props}>
-      {children}
-    </HeaderLink>
-  )
-}
-
-const H5 = ({ children, ...props }: { children?: React.ReactNode }) => {
-  return (
-    <HeaderLink tag="h5" {...props}>
-      {children}
-    </HeaderLink>
-  )
-}
-
-const H6 = ({ children, ...props }: { children?: React.ReactNode }) => {
-  return (
-    <HeaderLink tag="h6" {...props}>
-      {children}
-    </HeaderLink>
-  )
-}
 const A = ({
   children,
   ...props
@@ -119,12 +71,7 @@ const A = ({
   )
 }
 
-const Pre = ({
-  children
-}: {
-  children?: React.ReactNode
-  href?: string | undefined
-}) => {
+const Pre = ({ children }: { children?: ReactNode }): ReactElement => {
   return (
     <div className="not-prose">
       <pre>{children}</pre>
@@ -133,22 +80,17 @@ const Pre = ({
 }
 const components = {
   h1: H1,
-  h2: H2,
-  h3: H3,
-  h4: H4,
-  h5: H5,
-  h6: H6,
+  h2: createHeaderLink('h2'),
+  h3: createHeaderLink('h3'),
+  h4: createHeaderLink('h4'),
+  h5: createHeaderLink('h5'),
+  h6: createHeaderLink('h6'),
   a: A,
   pre: Pre
 }
 
-const MDXTheme: React.FC = ({ children }) => {
-  const slugger = new Slugger()
-  return (
-    <SluggerContext.Provider value={slugger}>
-      <MDXProvider components={components}>{children}</MDXProvider>
-    </SluggerContext.Provider>
-  )
+const MDXTheme = ({ children }: { children: ReactNode }): ReactElement => {
+  return <MDXProvider components={components}>{children}</MDXProvider>
 }
 
 export default MDXTheme

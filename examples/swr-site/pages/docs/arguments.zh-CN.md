@@ -24,11 +24,11 @@ useSWR('/api/user', url => fetchWithToken(url, token))
 const { data: user } = useSWR(['/api/user', token], fetchWithToken)
 ```
 
-`fetchWithToken` 函数仍然接受同样的2个参数，但现在缓存 key 也将与 `token` 相关联。
+`fetchWithToken` 函数仍然接受同样的 2 个参数，但现在缓存 key 也将与 `token` 相关联。
 
 ## 传入对象
 
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 <Callout>
   从 SWR 1.1.0 开始，object 类型的 keys 可以在内部自动被序列化。

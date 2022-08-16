@@ -1,12 +1,10 @@
-import Video from 'components/video'
-import Callout from 'nextra-theme-docs/callout'
-import Bleed from 'nextra-theme-docs/bleed'
-import Link from 'next/link'
+import Video from '@components/video'
+import { Callout, Bleed } from 'nextra-theme-docs'
 
 # 自動再検証
 
 <Callout>
-  データを手動で再検証する場合は、<Link href="/docs/mutation"><a href="/docs/mutation">ミューテーション</a></Link>を確認してください。
+  データを手動で再検証する場合は、[ミューテーション](/docs/mutation)を確認してください。
 </Callout>
 
 ## フォーカス時の再検証
@@ -68,7 +66,7 @@ import useSWRImmutable from 'swr/immutable'
 useSWRImmutable(key, fetcher, options)
 ```
 
-上記のフックは、通常の `useSWR` フックと同じAPIインターフェースを備えています。また、次の再検証オプションを無効にすることで、同じ処理を行うこともできます：
+上記のフックは、通常の `useSWR` フックと同じ API インターフェースを備えています。また、次の再検証オプションを無効にすることで、同じ処理を行うこともできます：
 
 ```js
 useSWR(key, fetcher, {

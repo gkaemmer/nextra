@@ -1,5 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
-import Link from 'next/link'
+import { Callout } from 'nextra-theme-docs'
 
 # Выборка данных
 
@@ -13,7 +12,7 @@ const { data, error } = useSWR(key, fetcher)
 
 <Callout emoji="💡">
   Обратите внимание, что <code>fetcher</code> можно не указывать в параметрах, если он{' '}
-  <Link href="/docs/global-configuration"><a href="/docs/global-configuration">предоставляется глобально</a></Link>.
+  [предоставляется глобально](/docs/global-configuration).
 </Callout>
 
 ## Выборка (Fetch)
@@ -33,7 +32,7 @@ function App () {
 
 <Callout emoji="💡">
   Если вы используете <strong>Next.js</strong>, вам не нужно импортировать этот полифил:<br/>
-  <a target="_blank" rel="noopener" href="https://nextjs.org/blog/next-9-1-7#new-built-in-polyfills-fetch-url-and-objectassign">Новые встроенные полифилы: fetch(), URL, и Object.assign</a>
+  [Новые встроенные полифилы: fetch(), URL, и Object.assign](https://nextjs.org/blog/next-9-1-7#new-built-in-polyfills-fetch-url-and-objectassign)
 </Callout>
 
 ## Axios

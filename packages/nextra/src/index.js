@@ -1,52 +1,75 @@
 import { NextraPlugin, pageMapCache } from './plugin'
+import { DEFAULT_LOCALE, MARKDOWN_EXTENSION_REGEX } from './constants'
 
-const defaultExtensions = ['js', 'jsx', 'ts', 'tsx']
-const markdownExtensions = ['md', 'mdx']
-const markdownExtensionTest = /\.mdx?$/
+const DEFAULT_EXTENSIONS = ['js', 'jsx', 'ts', 'tsx']
+const MARKDOWN_EXTENSIONS = ['md', 'mdx']
 
-module.exports =
-  (...args) =>
-  (nextConfig = {}) => {
+const nextra = (...config) =>
+  function withNextra(nextConfig = {}) {
     const nextraConfig =
-      typeof args[0] === 'string'
+      typeof config[0] === 'string'
         ? {
-            theme: args[0],
-            themeConfig: args[1]
+            theme: config[0],
+            themeConfig: config[1]
           }
-        : args[0]
+        : config[0]
 
-    const locales = nextConfig.i18n?.locales || null
-    const defaultLocale = nextConfig.i18n?.defaultLocale || null
+    const nextraPlugin = new NextraPlugin(nextraConfig)
 
-    let pageExtensions = nextConfig.pageExtensions || [...defaultExtensions]
-    pageExtensions = pageExtensions.concat(markdownExtensions)
-
-    if (locales) {
+    if (nextConfig.i18n?.locales) {
       console.log(
-        '[Nextra] You have Next.js i18n enabled, read here (TODO: link) for the docs.'
+        '[nextra] You have Next.js i18n enabled, read here https://nextjs.org/docs/advanced-features/i18n-routing for the docs.'
       )
     }
 
-    return Object.assign({}, nextConfig, {
-      pageExtensions,
+    return {
+      ...nextConfig,
+      pageExtensions: [
+        ...(nextConfig.pageExtensions || DEFAULT_EXTENSIONS),
+        ...MARKDOWN_EXTENSIONS
+      ],
       webpack(config, options) {
-        const nextra = new NextraPlugin(nextraConfig)
-        if (!config.plugins) {
-          config.plugins = [nextra]
-        } else {
-          config.plugins.push(nextra)
+        config.plugins ||= []
+        config.plugins.push(nextraPlugin)
+
+        const nextraLoaderOptions = {
+          ...nextraConfig,
+          locales: nextConfig.i18n?.locales || [DEFAULT_LOCALE],
+          defaultLocale: nextConfig.i18n?.defaultLocale || DEFAULT_LOCALE,
+          pageMapCache,
+          newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior
         }
 
-        config.module.rules.push({
-          test: markdownExtensionTest,
-          use: [
-            options.defaultLoaders.babel,
-            {
-              loader: 'nextra/loader',
-              options: { ...nextraConfig, locales, defaultLocale, pageMapCache }
-            }
-          ]
-        })
+        config.module.rules.push(
+          {
+            // Match Markdown imports from non-pages. These imports have an
+            // issuer, which can be anything as long as it's not empty.
+            test: MARKDOWN_EXTENSION_REGEX,
+            issuer: request => !!request,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'nextra/loader',
+                options: nextraLoaderOptions
+              }
+            ]
+          },
+          {
+            // Match pages (imports without an issuer).
+            test: MARKDOWN_EXTENSION_REGEX,
+            issuer: request => !request,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'nextra/loader',
+                options: {
+                  ...nextraLoaderOptions,
+                  pageImport: true
+                }
+              }
+            ]
+          }
+        )
 
         if (typeof nextConfig.webpack === 'function') {
           return nextConfig.webpack(config, options)
@@ -54,5 +77,7 @@ module.exports =
 
         return config
       }
-    })
+    }
   }
+
+module.exports = nextra

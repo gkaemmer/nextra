@@ -10,7 +10,7 @@
     "allowJs": true,
     "jsx": "react",
     "moduleResolution": "node",
+    "types": ["vitest/globals"],
     "resolveJsonModule": true
-  },
-  "include": ["src"]
+  }
 }

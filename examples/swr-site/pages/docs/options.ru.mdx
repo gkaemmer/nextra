@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 # Опции API
 
@@ -27,7 +27,7 @@ const { data, error, isValidating, mutate } = useSWR(key, fetcher, options)
 - `revalidateOnMount`: включить или отключить автоматическую ревалидацию при монтировании компонента
 - `revalidateOnFocus = true`: автоматически ревалидировать, когда окно фокусируется [(подробнее)](/docs/revalidation)
 - `revalidateOnReconnect = true`: автоматически ревалидировать, когда браузер восстанавливает сетевое подключение (через `navigator.onLine`) [(подробнее)](/docs/revalidation)
-- `refreshInterval` [(подробнее)](/docs/revalidation): 
+- `refreshInterval` [(подробнее)](/docs/revalidation):
   - по умолчанию отключен: `refreshInterval = 0`
   - If set to a number, интервал поллинга в миллисекундах
   - If set to a function, the function will receive the latest data and should return the interval in milliseconds
@@ -50,7 +50,7 @@ const { data, error, isValidating, mutate } = useSWR(key, fetcher, options)
 - `use`: массив middleware-функций [(подробнее)](/docs/middleware)
 
 <Callout emoji="💡">
-  В медленной сети (2G, {'<='} 70 Кбит/с), <code>errorRetryInterval</code> будет 10 секунд, 
+  В медленной сети (2G, {'<='} 70 Кбит/с), <code>errorRetryInterval</code> будет 10 секунд,
   а&nbsp;<code>loadingTimeout</code> будет по умолчанию 5 секунд.
 </Callout>
 

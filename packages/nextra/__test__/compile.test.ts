@@ -1,9 +1,16 @@
 import { compileMdx } from '../src/compile'
 import { it, describe, expect } from 'vitest'
 import path from 'path'
-import fs from 'fs/promises'
+import { promises as fs } from 'fs'
 
-function loadFixture(name: string) {
+type Name =
+  | 'code-h1.mdx'
+  | 'code-with-text-h1.mdx'
+  | 'dynamic-h1.mdx'
+  | 'no-h1.mdx'
+  | 'static-h1.mdx'
+
+function loadFixture(name: Name) {
   const filePath = path.join(
     process.cwd(),
     '__test__',
@@ -15,6 +22,16 @@ function loadFixture(name: string) {
 }
 
 describe('process heading', () => {
+  it('code-h1', async () => {
+    const data = await loadFixture('code-h1.mdx')
+    const result = await compileMdx(data)
+    expect(result).toMatchSnapshot()
+  })
+  it('code-with-text-h1', async () => {
+    const data = await loadFixture('code-with-text-h1.mdx')
+    const result = await compileMdx(data)
+    expect(result).toMatchSnapshot()
+  })
   it('static-h1', async () => {
     const data = await loadFixture('static-h1.mdx')
     const result = await compileMdx(data)

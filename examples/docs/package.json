@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -8,12 +8,22 @@
     "build": "next build",
     "start": "next start",
     "debug": "NODE_OPTIONS='--inspect' next dev",
-    "vercel-build": "yarn workspace nextra run build && yarn workspace nextra-theme-docs run build && yarn build"
+    "vercel-build": "yarn workspace nextra run build && yarn workspace nextra-theme-docs run build && yarn build",
+    "clean": "rimraf .next .turbo"
   },
   "dependencies": {
-    "prism-react-renderer": "^1.1.1",
-    "prismjs": "^1.22.0",
+    "react": "*",
+    "react-dom": "*",
+    "next": ">=12",
     "nextra": "workspace:*",
     "nextra-theme-docs": "workspace:*"
+  },
+  "dependenciesMeta": {
+    "nextra": {
+      "injected": true
+    },
+    "nextra-theme-docs": {
+      "injected": true
+    }
   }
 }

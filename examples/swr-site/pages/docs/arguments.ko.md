@@ -11,7 +11,7 @@ useSWR('/api/user', fetcher)
 ## 다중 인자
 
 어떤 시나리오에서는 `fetcher` 함수에 여러 인자(어떠한 값이나 객체도 가능)를 전달하는 것이 유용합니다.
-인증된 가져오기 요청 예시입니다: 
+인증된 가져오기 요청 예시입니다:
 
 ```js
 useSWR('/api/user', url => fetchWithToken(url, token))
@@ -30,7 +30,7 @@ const { data: user } = useSWR(['/api/user', token], fetchWithToken)
 
 ## 객체 전달
 
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 <Callout>
   Since SWR 1.1.0, object-like keys will be serialized under the hood automatically. 

@@ -1,19 +1,18 @@
 import { createProcessor, ProcessorOptions } from '@mdx-js/mdx'
+import { Processor } from '@mdx-js/mdx/lib/core'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
+import { rehypeMdxTitle } from 'rehype-mdx-title'
 import { remarkStaticImage } from './mdx-plugins/static-image'
-import remarkHandler, { HeadingMeta } from './mdx-plugins/remark'
-import { LoaderOptions } from './types'
+import { remarkHeadings } from './mdx-plugins/remark'
+import { LoaderOptions, PageOpts } from './types'
 import structurize from './mdx-plugins/structurize'
 import { parseMeta, attachMeta } from './mdx-plugins/rehype-handler'
-
-// @ts-ignore
 import theme from './theme.json'
 
-const createCompiler = (mdxOptions: ProcessorOptions) => {
+const createCompiler = (mdxOptions: ProcessorOptions): Processor => {
   const compiler = createProcessor(mdxOptions)
   compiler.data('headingMeta', {
-    hasH1: false,
     headings: []
   })
   return compiler
@@ -21,51 +20,40 @@ const createCompiler = (mdxOptions: ProcessorOptions) => {
 
 const rehypePrettyCodeOptions = {
   theme,
-  // onVisitLine(node: any) {
-  //   // Style a line node.
-  //   Object.assign(node.style, {
-  //   })
-  // },
-  onVisitHighlightedLine(node: any) {
-    // Style a highlighted line node.
-    if (!node.properties.className) {
-      node.properties.className = []
+  onVisitLine(node: any) {
+    // Prevent lines from collapsing in `display: grid` mode, and
+    // allow empty lines to be copy/pasted
+    if (node.children.length === 0) {
+      node.children = [{ type: 'text', value: ' ' }]
     }
+  },
+  onVisitHighlightedLine(node: any) {
     node.properties.className.push('highlighted')
   },
   onVisitHighlightedWord(node: any) {
-    // Style a highlighted word node.
-    if (!node.properties.className) {
-      node.properties.className = []
-    }
-    node.properties.className.push('highlighted')
+    node.properties.className = ['highlighted']
   }
 }
 
 export async function compileMdx(
   source: string,
-  mdxOptions: LoaderOptions['mdxOptions'] = {},
-  nextraOptions: {
-    unstable_staticImage: boolean
-    unstable_flexsearch:
-      | boolean
-      | {
-          codeblocks: boolean
-        }
-  } = {
-    unstable_staticImage: false,
-    unstable_flexsearch: false
-  },
-  resourcePath: string
+  mdxOptions: LoaderOptions['mdxOptions'] &
+    Pick<ProcessorOptions, 'jsx' | 'outputFormat'> = {},
+  nextraOptions: Pick<
+    LoaderOptions,
+    'unstable_staticImage' | 'unstable_flexsearch'
+  > = {},
+  resourcePath = ''
 ) {
-  let structurizedData = {}
+  const structurizedData = {}
   const compiler = createCompiler({
-    jsx: true,
+    jsx: mdxOptions.jsx ?? true,
+    outputFormat: mdxOptions.outputFormat,
     providerImportSource: '@mdx-js/react',
     remarkPlugins: [
       ...(mdxOptions.remarkPlugins || []),
       remarkGfm,
-      remarkHandler,
+      remarkHeadings,
       ...(nextraOptions.unstable_staticImage ? [remarkStaticImage] : []),
       ...(nextraOptions.unstable_flexsearch
         ? [structurize(structurizedData, nextraOptions.unstable_flexsearch)]
@@ -75,20 +63,29 @@ export async function compileMdx(
     rehypePlugins: [
       ...(mdxOptions.rehypePlugins || []),
       parseMeta,
-      [rehypePrettyCode, rehypePrettyCodeOptions],
+      [
+        rehypePrettyCode,
+        { ...rehypePrettyCodeOptions, ...mdxOptions.rehypePrettyCodeOptions }
+      ],
+      [rehypeMdxTitle, { name: '__nextra_title__' }],
       attachMeta
     ].filter(Boolean)
   })
   try {
-    const result = await compiler.process(source)
+    const result = String(await compiler.process(source))
+      .replace('export const __nextra_title__', 'const __nextra_title__')
+      .replace('export default MDXContent;', '')
+
     return {
-      result: String(result),
-      ...(compiler.data('headingMeta') as HeadingMeta),
+      result,
+      ...(compiler.data('headingMeta') as Pick<
+        PageOpts,
+        'headings' | 'hasJsxInH1'
+      >),
       structurizedData
     }
   } catch (err) {
-    console.error(`\nError compiling ${resourcePath}`)
-    console.error(`${err}\n`)
+    console.error(`[nextra] Error compiling ${resourcePath}.`)
     throw err
   }
 }

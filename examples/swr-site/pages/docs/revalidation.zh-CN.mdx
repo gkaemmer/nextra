@@ -1,12 +1,10 @@
-import Video from 'components/video'
-import Callout from 'nextra-theme-docs/callout'
-import Bleed from 'nextra-theme-docs/bleed'
-import Link from 'next/link'
+import Video from '@components/video'
+import { Callout, Bleed } from 'nextra-theme-docs'
 
 # 自动重新请求
 
 <Callout>
-  如果你想手动重新请求数据，请查看 <Link href="/docs/mutation"><a href="/docs/mutation">mutation</a></Link>。
+  如果你想手动重新请求数据，请查看 [mutation](/docs/mutation)。
 </Callout>
 
 ## 聚焦时重新请求
@@ -68,7 +66,7 @@ import useSWRImmutable from 'swr/immutable'
 useSWRImmutable(key, fetcher, options)
 ```
 
-它具有与普通 `useSWR` hook 相同的 API 接口。你还可以通过禁用以下重新请求​​选项来执行相同的操作：
+它具有与普通 `useSWR` hook 相同的 API 接口。你还可以通过禁用以下重新请求 ​​ 选项来执行相同的操作：
 
 ```js
 useSWR(key, fetcher, {

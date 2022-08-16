@@ -29,7 +29,7 @@ La función `fetchWithToken` sigue aceptando los mismo 2 argumentos, pero ahora 
 
 ## Pasar objectos
 
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 <Callout>
   Since SWR 1.1.0, object-like keys will be serialized under the hood automatically. 
@@ -53,4 +53,3 @@ const { data: orders } = useSWR({ url: '/api/orders', args: user }, fetcher)
 <Callout emoji="⚠️">
   In older versions (< 1.1.0), SWR **shallowly** compares the arguments on every render, and triggers revalidation if any of them has changed. 
 </Callout>
-

@@ -1,5 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
-import Link from 'next/link'
+import { Callout } from 'nextra-theme-docs'
 
 # Comienza
 
@@ -28,7 +27,7 @@ const fetcher = (...args) => fetch(...args).then(res => res.json())
 
 <Callout emoji="💡">
     Si tu quieres usar API GraphQL o librerías como Axios, puedes crear tu propia función fetcher. Consulta
-    <Link href="/docs/data-fetching"><a href="/docs/data-fetching">aqui</a></Link> para ver más ejemplos.
+    [aqui](/docs/data-fetching) para ver más ejemplos.
 </Callout>
 
 Luego puede importar `useSWR` y empezar a usarlo dentro de cualquier componente de la función:
@@ -88,7 +87,7 @@ que especificar qué datos utiliza el componente.
 En un ejemplo del mundo real, nuestro sitio web muestra una barra de navegación y el contenido,
 ambos dependen del `user`:
 
-import { Welcome } from 'components/diagrams/welcome'
+import { Welcome } from '@components/diagrams/welcome'
 
 <div className="mt-8">
   <Welcome/>
@@ -97,7 +96,7 @@ import { Welcome } from 'components/diagrams/welcome'
 Tradicionalmente, obtenemos los datos una vez utilizando `useEffect` en el componente de nivel superiror, y pasarlo a los componentes hijos
 a través de props (fíjate que por ahora no manejamos el estado de error):
 
-```jsx bg=7:11,17,18,27
+```jsx {7-11,17,18,27}
 // componente de la página
 
 function Page() {
@@ -150,7 +149,7 @@ Los componentes dentro del contenido de la página pueden ser dinámicos, y comp
 
 SWR resuelve el problema perfectamente, Con el hook `useUser` que acabamos de crear, el código puede ser refactorizado a:
 
-```jsx bg=20,26
+```jsx {20,26}
 
 // componente de la página
 

@@ -1,11 +1,6 @@
 import { Processor } from '@mdx-js/mdx/lib/core'
 import { Root, Heading, Parent } from 'mdast'
-
-export interface HeadingMeta {
-  titleText?: string
-  hasH1: boolean
-  headings: Heading[]
-}
+import { PageOpts } from '../types'
 
 function visit(
   node: any,
@@ -15,9 +10,7 @@ function visit(
   if (tester(node)) {
     handler(node)
   }
-  if (node.children) {
-    node.children.forEach((n: any) => visit(n, tester, handler))
-  }
+  node.children?.forEach((n: any) => visit(n, tester, handler))
 }
 
 export function getFlattenedValue(node: Parent): string {
@@ -32,8 +25,10 @@ export function getFlattenedValue(node: Parent): string {
     .join('')
 }
 
-export default function remarkHeadings(this: Processor) {
-  const data = this.data() as any
+export function remarkHeadings(this: Processor) {
+  const data = this.data() as {
+    headingMeta: Pick<PageOpts, 'headings' | 'hasJsxInH1'>
+  }
   return (tree: Root, _file: any, done: () => void) => {
     visit(
       tree,
@@ -47,22 +42,20 @@ export default function remarkHeadings(this: Processor) {
       },
       node => {
         if (node.type === 'heading') {
+          const hasJsxInH1 =
+            node.depth === 1 &&
+            Array.isArray(node.children) &&
+            node.children.some(
+              (child: { type: string }) => child.type === 'mdxJsxTextElement'
+            )
           const heading = {
             ...(node as Heading),
             value: getFlattenedValue(node)
           }
-          const headingMeta = data.headingMeta as HeadingMeta
-          if (node.depth === 1) {
-            headingMeta.hasH1 = true
-            if (Array.isArray(node.children) && node.children.length === 1) {
-              const child = node.children[0]
-              if (child.type === 'text') {
-                headingMeta.titleText = child.value
-              }
-            }
+          data.headingMeta.headings.push(heading)
+          if (hasJsxInH1) {
+            data.headingMeta.hasJsxInH1 = true
           }
-
-          headingMeta.headings.push(heading)
         } else if (node.name === 'summary' || node.name === 'details') {
           // Replace the <summary> and <details> with customized components.
           if (node.data) {

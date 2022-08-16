@@ -1,15 +1,35 @@
+import { NextConfig } from 'next'
 import { Heading as MDASTHeading } from 'mdast'
 import { ProcessorOptions } from '@mdx-js/mdx'
-import { PageMapCache } from './plugin'
-export interface LoaderOptions {
-  theme: Theme
-  themeConfig: string
+import { Options as RehypePrettyCodeOptions } from 'rehype-pretty-code'
+import { GrayMatterFile } from 'gray-matter'
+
+export abstract class NextraPluginCache {
+  public cache: { items: PageMapItem[]; fileMap: Record<string, any> } | null
+
+  constructor() {
+    this.cache = { items: [], fileMap: {} }
+  }
+
+  set(data: { items: PageMapItem[]; fileMap: Record<string, any> }) {
+    this.cache!.items = data.items
+    this.cache!.fileMap = data.fileMap
+  }
+
+  clear() {
+    this.cache = null
+  }
+
+  get() {
+    return this.cache
+  }
+}
+export interface LoaderOptions extends NextraConfig {
+  pageImport?: boolean
   locales: string[]
   defaultLocale: string
-  unstable_staticImage: boolean
-  unstable_flexsearch: boolean
-  mdxOptions: Pick<ProcessorOptions, 'rehypePlugins' | 'remarkPlugins'>
-  pageMapCache: PageMapCache
+  pageMapCache: NextraPluginCache
+  newNextLinkBehavior?: boolean
 }
 
 export interface PageMapItem {
@@ -26,14 +46,18 @@ export interface PageMapItem {
 export type Heading = MDASTHeading & {
   value: string
 }
-export interface PageOpt {
+
+export type PageOpts = {
   filename: string
   route: string
-  meta: Record<string, any>
+  meta: GrayMatterFile<string>['data']
   pageMap: PageMapItem[]
-  titleText: string | null
-  headings?: Heading[]
-  hasH1: boolean
+  title: string
+  headings: Heading[]
+  hasJsxInH1?: boolean
+  timestamp?: number
+  unstable_flexsearch?: Flexsearch
+  newNextLinkBehavior?: boolean
 }
 
 export type PageMapResult = [
@@ -43,16 +67,24 @@ export type PageMapResult = [
 ]
 
 type Theme = string
+type Flexsearch = boolean | { codeblocks: boolean }
 
 export type NextraConfig = {
   theme: Theme
-  themeConfig: string
-  unstable_flexsearch: boolean
+  themeConfig?: string
+  unstable_flexsearch?: Flexsearch
   unstable_staticImage?: boolean
+  mdxOptions?: Pick<ProcessorOptions, 'rehypePlugins' | 'remarkPlugins'> & {
+    rehypePrettyCodeOptions?: Partial<RehypePrettyCodeOptions>
+  }
 }
 
-export type withNextra = (
+export type Nextra = (
   ...args: [NextraConfig] | [theme: Theme, themeConfig: string]
-) => (nextConfig: Record<string, any>) => {}
+) => (nextConfig: NextConfig) => NextConfig
 
-export default withNextra
+const nextra: Nextra =
+  (...args) =>
+  nextConfig => ({})
+
+export default nextra

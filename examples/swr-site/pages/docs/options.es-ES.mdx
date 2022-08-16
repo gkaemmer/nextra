@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 # API Options
 
@@ -29,10 +29,10 @@ const { data, error, isValidating, mutate } = useSWR(key, fetcher, options)
 - `revalidateOnFocus = true`: revalidación automática cuanto window gets focused [(detalles)](/docs/revalidation)
 - `revalidateOnReconnect = true`: revalidación automática cuando el navegador recupera la conexión a la red
   (a través de `navigator.onLine`) [(detalles)](/docs/revalidation)
-- `refreshInterval` [(detalles)](/docs/revalidation): 
+- `refreshInterval` [(detalles)](/docs/revalidation):
   - desactivado por defecto: `refreshInterval = 0`
-  - If set to a number, polling interval 
-  - If set to a function, the function will receive the latest data and should return the interval in milliseconds  
+  - If set to a number, polling interval
+  - If set to a function, the function will receive the latest data and should return the interval in milliseconds
 - `refreshWhenHidden = false`: polling cuando window es invisible (si `refreshInterval` está activado)
 - `refreshWhenOffline = false`: polling cuando el navegador está desconectado (determinado por `navigator.onLine`)
 - `shouldRetryOnError = true`: reitentar cuando el fetcher tiene un error
@@ -53,7 +53,7 @@ const { data, error, isValidating, mutate } = useSWR(key, fetcher, options)
 - `use`: array of middleware functions [(details)](/docs/middleware)
 
 <Callout emoji="💡">
-Cuando una red lenta (2G, {'<='} 70Kbps), `errorRetryInterval` serian 10 segundos, y 
+Cuando una red lenta (2G, {'<='} 70Kbps), `errorRetryInterval` serian 10 segundos, y
 `loadingTimeout` serian 5 segundos por defecto.
 </Callout>
 

@@ -1,32 +1,53 @@
-import type { LoaderOptions } from './types'
+import type { LoaderOptions, PageOpts } from './types'
 
 import path from 'path'
 import grayMatter from 'gray-matter'
 import slash from 'slash'
 import { LoaderContext } from 'webpack'
 import { Repository } from '@napi-rs/simple-git'
+import { findPagesDir } from 'next/dist/lib/find-pages-dir.js'
 
 import { addPage } from './content-dump'
-import { getLocaleFromFilename } from './utils'
+import { parseFileName } from './utils'
 import { compileMdx } from './compile'
-import { getPageMap, findPagesDir } from './page-map'
-import { collectFiles } from './plugin'
-const extension = /\.mdx?$/
-const isProductionBuild = process.env.NODE_ENV === 'production'
+import { getPageMap } from './page-map'
+import { collectFiles, collectMdx } from './plugin'
+import {
+  IS_PRODUCTION,
+  DEFAULT_LOCALE,
+  OFFICIAL_THEMES,
+  MARKDOWN_EXTENSION_REGEX
+} from './constants'
 
 // TODO: create this as a webpack plugin.
-const indexContentEmitted = new Set()
+const indexContentEmitted = new Set<string>()
 
-const pagesDir = path.resolve(findPagesDir())
+const pagesDir = findPagesDir(process.cwd()).pages
 
-let [repository, gitRoot] = (function () {
+const [repository, gitRoot] = (function () {
   try {
     const repo = Repository.discover(process.cwd())
+    if (repo.isShallow()) {
+      if (process.env.VERCEL) {
+        console.warn(
+          '[nextra] The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.'
+        )
+      } else if (process.env.GITHUB_ACTION) {
+        console.warn(
+          '[nextra] The repository is shallow cloned, so the latest modified time will not be presented. See https://github.com/actions/checkout#fetch-all-history-for-all-tags-and-branches to fetch all the history.'
+        )
+      } else {
+        console.warn(
+          '[nextra] The repository is shallow cloned, so the latest modified time will not be presented.'
+        )
+      }
+    }
     // repository.path() returns the `/path/to/repo/.git`, we need the parent directory of it
     const gitRoot = path.join(repo.path(), '..')
+
     return [repo, gitRoot]
   } catch (e) {
-    console.warn('Init git repository failed', e)
+    console.warn('[nextra] Init git repository failed', e)
     return []
   }
 })()
@@ -34,39 +55,80 @@ let [repository, gitRoot] = (function () {
 async function loader(
   context: LoaderContext<LoaderOptions>,
   source: string
-): Promise<string | Buffer> {
-  context.cacheable(true)
-
-  const options = context.getOptions()
-  let {
+): Promise<string> {
+  const { resourcePath } = context
+  const {
+    pageImport,
     theme,
     themeConfig,
     defaultLocale,
     unstable_flexsearch,
     unstable_staticImage,
     mdxOptions,
-    pageMapCache
-  } = options
+    pageMapCache,
+    newNextLinkBehavior
+  } = context.getOptions()
 
-  const { resourcePath } = context
-  const filename = resourcePath.slice(resourcePath.lastIndexOf('/') + 1)
-  const fileLocale = getLocaleFromFilename(filename)
+  context.cacheable(true)
 
   // Check if there's a theme provided
   if (!theme) {
     throw new Error('No Nextra theme found!')
   }
 
-  let pageMapResult, fileMap
-  if (isProductionBuild) {
-    const data = pageMapCache.get()!
-    pageMapResult = data.items
-    fileMap = data.fileMap
-  } else {
-    const data = await collectFiles(pagesDir, '/')
-    pageMapResult = data.items
-    fileMap = data.fileMap
+  if (resourcePath.includes('/pages/api/')) {
+    console.warn(
+      `[nextra] Ignoring ${resourcePath} because it is located in the "pages/api" folder.`
+    )
+    return ''
   }
+
+  const { items: pageMapResult, fileMap } = IS_PRODUCTION
+    ? pageMapCache.get()!
+    : await collectFiles(pagesDir, '/')
+
+  // mdx is imported but is outside the `pages` directory
+  if (!fileMap[resourcePath]) {
+    fileMap[resourcePath] = await collectMdx(resourcePath)
+    context.addMissingDependency(resourcePath)
+  }
+
+  const filename = path.basename(resourcePath)
+  const fileLocale = parseFileName(filename).locale
+
+  for (const [filePath, { name, locale }] of Object.entries(fileMap)) {
+    if (name === 'meta.json' && (!fileLocale || locale === fileLocale)) {
+      context.addDependency(filePath)
+    }
+  }
+  // Add the entire directory `pages` as the dependency,
+  // so we can generate the correct page map.
+  context.addContextDependency(pagesDir)
+
+  // Extract frontMatter information if it exists
+  const { data: meta, content } = grayMatter(source)
+
+  const { result, headings, structurizedData, hasJsxInH1 } = await compileMdx(
+    content,
+    mdxOptions,
+    {
+      unstable_staticImage,
+      unstable_flexsearch
+    },
+    resourcePath
+  )
+  const cssImport = OFFICIAL_THEMES.includes(theme)
+    ? `import '${theme}/style.css'`
+    : ''
+
+  // Imported as a normal component, no need to add the layout.
+  if (!pageImport) {
+    return `
+${cssImport}
+${result}
+export default MDXContent`.trimStart()
+  }
+
   const [pageMap, route, title] = getPageMap(
     resourcePath,
     pageMapResult,
@@ -74,139 +136,100 @@ async function loader(
     defaultLocale
   )
 
-  if (!isProductionBuild) {
-    // Add the entire directory `pages` as the dependency
-    // so we can generate the correct page map.
-    context.addContextDependency(pagesDir)
-  } else {
-    // We only add meta files as dependencies for prodution build,
-    // so we can do incremental builds.
-    Object.entries(fileMap).forEach(([filePath, { name, meta, locale }]) => {
-      if (
-        name === 'meta.json' &&
-        meta &&
-        (!fileLocale || locale === fileLocale)
-      ) {
-        context.addDependency(filePath)
-      }
-    })
-  }
-
-  // Extract frontMatter information if it exists
-  let { data, content } = grayMatter(source)
-
-  let layout = theme
-  let layoutConfig = themeConfig || null
-
-  // Relative path instead of a package name
-  if (theme.startsWith('.') || theme.startsWith('/')) {
-    layout = path.resolve(theme)
-  }
-  if (layoutConfig) {
-    layoutConfig = slash(path.resolve(layoutConfig))
-  }
-
-  if (isProductionBuild && indexContentEmitted.has(filename)) {
-    unstable_flexsearch = false
-  }
-
-  const { result, titleText, headings, hasH1, structurizedData } =
-    await compileMdx(
-      content,
-      mdxOptions,
-      {
-        unstable_staticImage,
-        unstable_flexsearch
-      },
-      resourcePath
-    )
-  content = result
-  content = content.replace('export default MDXContent;', '')
-
-  if (unstable_flexsearch) {
-    // We only add .MD and .MDX contents
-    if (extension.test(filename) && data.searchable !== false) {
-      await addPage({
-        fileLocale: fileLocale || 'default',
+  const skipFlexsearchIndexing =
+    IS_PRODUCTION && indexContentEmitted.has(filename)
+  if (unstable_flexsearch && !skipFlexsearchIndexing) {
+    if (meta.searchable !== false) {
+      addPage({
+        fileLocale: fileLocale || DEFAULT_LOCALE,
         route,
         title,
-        data,
+        meta,
         structurizedData
       })
     }
-
     indexContentEmitted.add(filename)
   }
 
-  let timestamp: number | undefined
+  let timestamp: PageOpts['timestamp']
   if (repository && gitRoot) {
-    if (repository.isShallow()) {
-      if (process.env.VERCEL) {
-        console.warn(
-          `The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.`
-        )
-      } else if (process.env.GITHUB_ACTION) {
-        console.warn(
-          `The repository is shallow cloned, so the latest modified time will not be presented. See https://github.com/actions/checkout#fetch-all-history-for-all-tags-and-branches to fetch all the history.`
-        )
-      } else {
-        console.warn(
-          `The repository is shallow cloned, so the latest modified time will not be presented.`
-        )
-      }
-    }
     try {
       timestamp = await repository.getFileLatestModifiedDateAsync(
         path.relative(gitRoot, resourcePath)
       )
-    } catch (e) {
+    } catch {
       // Failed to get timestamp for this file. Silently ignore it.
     }
   }
 
-  const prefix =
-    `import __nextra_withLayout__ from '${layout}'\n` +
-    `import { withSSG as __nextra_withSSG__ } from 'nextra/ssg'\n` +
-    `${
-      layoutConfig
-        ? `import __nextra_layoutConfig__ from '${layoutConfig}'`
-        : ''
-    }\n\n` +
-    `const __nextra_pageMap__ = ${JSON.stringify(pageMap)}\n` +
-    `globalThis.__nextra_internal__ = {\n` +
-    `  pageMap: __nextra_pageMap__,\n` +
-    `  route: ${JSON.stringify(route)},\n` +
-    `}\n` +
-    `
-    const __nextra_content__ = <MDXContent/>
-    const NextraLayout = __nextra_withSSG__(__nextra_withLayout__({
-      filename: "${slash(filename)}",
-      route: "${slash(route)}",
-      meta: ${JSON.stringify(data)},
-      pageMap: __nextra_pageMap__,
-      titleText: ${JSON.stringify(titleText)},
-      headings: ${JSON.stringify(headings)},
-      hasH1: ${JSON.stringify(hasH1)},
-      ${timestamp ? `timestamp: ${timestamp},\n` : ''}
-    }, ${layoutConfig ? '__nextra_layoutConfig__' : 'null'}))
-    `
+  // Relative path instead of a package name
+  const layout =
+    theme.startsWith('.') || theme.startsWith('/') ? path.resolve(theme) : theme
 
-  const suffix = `export default function NextraPage (props) {
-  return <NextraLayout {...props}>{__nextra_content__}</NextraLayout>
+  const themeConfigImport = themeConfig
+    ? `import __nextra_themeConfig__ from '${slash(path.resolve(themeConfig))}'`
+    : ''
+  const pageOpts: Omit<PageOpts, 'title'> = {
+    filename,
+    route: slash(route),
+    meta,
+    pageMap,
+    headings,
+    hasJsxInH1,
+    timestamp,
+    unstable_flexsearch,
+    newNextLinkBehavior
+  }
+
+  const pageNextRoute =
+    '/' +
+    slash(path.relative(pagesDir, resourcePath))
+      // Remove the `mdx?` extension
+      .replace(MARKDOWN_EXTENSION_REGEX, '')
+      // Remove the `*/index` suffix
+      .replace(/\/index$/, '')
+      // Remove the only `index` route
+      .replace(/^index$/, '')
+
+  return `
+import { SSGContext as __nextra_SSGContext__ } from 'nextra/ssg'
+import __nextra_withLayout__ from '${layout}'
+${themeConfigImport}
+${cssImport}
+
+${result}
+
+const __nextra_pageOpts__ = ${JSON.stringify(pageOpts)}
+
+globalThis.__nextra_internal__ = {
+  pageMap: __nextra_pageOpts__.pageMap,
+  route: __nextra_pageOpts__.route
 }
-NextraPage.getLayout = NextraLayout.getLayout`
 
-  // console.log(content)
+const Content = props => (
+  <__nextra_SSGContext__.Provider value={props}>
+    <MDXContent />
+  </__nextra_SSGContext__.Provider>
+)
 
-  // Add imports and exports to the source
-  return prefix + '\n\n' + content + '\n\n' + suffix
+export default __nextra_withLayout__(
+  ${JSON.stringify(pageNextRoute)},
+  Content,
+  {
+    title: __nextra_pageOpts__.meta.title
+      || (typeof __nextra_title__ === 'string' && __nextra_title__)
+      || 'Untitled',
+    ...__nextra_pageOpts__
+  },
+  ${themeConfigImport ? '__nextra_themeConfig__' : 'null'},
+)`.trimStart()
 }
 
 export default function syncLoader(
   this: LoaderContext<LoaderOptions>,
   source: string,
   callback: (err?: null | Error, content?: string | Buffer) => void
-) {
+): void {
   loader(this, source)
     .then(result => callback(null, result))
     .catch(err => callback(err))

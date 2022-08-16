@@ -1,9 +1,8 @@
-import Callout from 'nextra-theme-docs/callout'
-import Link from 'next/link'
+import { Callout } from 'nextra-theme-docs'
 
 # 错误处理
 
-如果在 [`fetcher`](/docs/data-fetching) 中抛出错误，hook 会将其作为 `error` 返回。 
+如果在 [`fetcher`](/docs/data-fetching) 中抛出错误，hook 会将其作为 `error` 返回。
 
 ```js
 const fetcher = url => fetch(url).then(r => r.json())
@@ -47,7 +46,7 @@ const { data, error } = useSWR('/api/user', fetcher)
 ```
 
 <Callout emoji="💡">
-  注意：<code>data</code> 和 <code>error</code> 可以同时存在。所以 UI 可以在知道即将到来的请求失败时显示现有数据。 
+  注意：<code>data</code> 和 <code>error</code> 可以同时存在。所以 UI 可以在知道即将到来的请求失败时显示现有数据。
 </Callout>
 
 [这里](/examples/error-handling)有一个示例。

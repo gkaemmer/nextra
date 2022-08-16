@@ -30,7 +30,7 @@ const { data: user } = useSWR(['/api/user', token], fetchWithToken)
 
 ## オブジェクトの受け渡し
 
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 <Callout>
   SWR 1.1.0 からは、オブジェクトのようなキーは内部で自動的にシリアライズされます。
@@ -54,4 +54,3 @@ const { data: orders } = useSWR({ url: '/api/orders', args: user }, fetcher)
 <Callout emoji="⚠️">
   古いバージョン（< 1.1.0）では、SWR はすべてのレンダリングで引数を**浅く**比較し、いずれかが変更された場合は再検証を実行します。
 </Callout>
-  

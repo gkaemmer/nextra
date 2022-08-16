@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from 'nextra-theme-docs'
 
 # ミドルウェア
 
@@ -111,7 +111,7 @@ useSWR(key, fetcher, { use: [logger] })
 
 リクエストが発生するたびに、 SWR キーがコンソールに出力されます：
 
-```txt
+```plaintext
 SWR Request: /api/user1
 SWR Request: /api/user2
 ```

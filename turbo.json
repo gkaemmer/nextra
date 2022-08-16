@@ -4,24 +4,35 @@
   "pipeline": {
     "build": {
       "dependsOn": [
-        "types",
         "^build"
       ],
       "outputs": [
+        "dist/**/*.d.ts",
+        "dist/**/*.mjs",
         "dist/**/*.js",
         "dist/**/*.css",
         ".next/**",
-        "style.css",
         "index.js",
         "ssg.js",
         "loader.js"
       ]
     },
-    "test": {},
-    "types": {
+    "build:tailwind": {
+      "dependsOn": [],
       "outputs": [
-        "dist/**/*.d.ts"
+        "style.css"
       ]
+    },
+    "test": {},
+    "types:check": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "format": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
     },
     "dev": {
       "cache": false
