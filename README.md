@@ -24,7 +24,6 @@ Then, in this repository, run:
 pnpm i
 
 cd packages/nextra-theme-docs
-npm link
 pnpm i
 # This will watch for changes
 pnpm dev
@@ -33,7 +32,7 @@ pnpm dev
 In the Oso Cloud Docs folder, run:
 
 ```
-npm link nextra-theme-docs-oso
+npm run local-theme
 ```
 
 Then, you should be able to make changes to `packages/nextra-theme-docs` and see
