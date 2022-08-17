@@ -63,7 +63,12 @@ function FolderImpl({ item, anchors }: FolderProps) {
   const link = (
     <Anchor
       href={(item as Item).withIndexPage ? item.route : ''}
-      className="cursor-pointer !flex gap-2 items-center justify-between [word-break:break-word]"
+      // BEGIN OSO-SPECIFIC CODE: add a section class
+      // className="cursor-pointer !flex gap-2 items-center justify-between [word-break:break-word]"
+      className={`cursor-pointer !flex gap-2 items-center justify-between [word-break:break-word] ${
+        isSection ? 'section' : ''
+      }`}
+      // END OSO-SPECIFIC CODE
       onClick={e => {
         const clickedToggleIcon = ['svg', 'path'].includes(
           (e.target as HTMLElement).tagName.toLowerCase()
