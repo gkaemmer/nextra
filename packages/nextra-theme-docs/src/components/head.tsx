@@ -16,7 +16,7 @@ export function Head(): ReactElement {
       <title>{config.title + renderString(config.titleSuffix)}</title>
       {/* BEGIN OSO-SPECIFIC CODE: this can be reverted once the useConfig thing is fixed */}
       {/* {renderComponent(config.head)} */}
-      {renderComponent(config.head, { config })}
+      {typeof config.head === 'function' ? config.head({ config }) : null}
       {/* END OSO-SPECIFIC CODE */}
       {config.unstable_faviconGlyph ? (
         <link

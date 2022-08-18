@@ -86,6 +86,8 @@ function FolderImpl({ item, anchors }: FolderProps) {
           }
           rerender({})
           return
+        } else {
+          e.preventDefault()
         }
         if (active) return
         TreeState[item.route] = !open
