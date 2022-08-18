@@ -14,7 +14,10 @@ export function Head(): ReactElement {
   return (
     <NextHead>
       <title>{config.title + renderString(config.titleSuffix)}</title>
-      {renderComponent(config.head)}
+      {/* BEGIN OSO-SPECIFIC CODE: this can be reverted once the useConfig thing is fixed */}
+      {/* {renderComponent(config.head)} */}
+      {renderComponent(config.head, { config })}
+      {/* END OSO-SPECIFIC CODE */}
       {config.unstable_faviconGlyph ? (
         <link
           rel="icon"
