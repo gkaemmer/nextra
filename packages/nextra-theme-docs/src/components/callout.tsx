@@ -28,6 +28,7 @@ export function Callout({
     <div
       className={cn(
         'nextra-callout border mt-6 flex rounded-lg py-2 ltr:pr-4 rtl:pl-4',
+        'contrast-more:border-current contrast-more:dark:border-current',
         themes[type]
       )}
     >
@@ -39,9 +40,7 @@ export function Callout({
       >
         {emoji}
       </div>
-      <span>
-        {children}
-      </span>
+      <div className="min-w-0">{children}</div>
     </div>
   )
 }

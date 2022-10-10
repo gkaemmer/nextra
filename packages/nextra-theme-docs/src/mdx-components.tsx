@@ -14,6 +14,7 @@ import { Collapse, Anchor } from './components'
 import { IS_BROWSER } from './constants'
 import cn from 'clsx'
 import { DocsThemeConfig } from './types'
+import { Code, Pre, Table, Td, Th, Tr } from 'nextra/components'
 
 let observer: IntersectionObserver
 let setActiveAnchor: ReturnType<typeof useSetActiveAnchor>
@@ -83,18 +84,19 @@ const createHeaderLink = (
     id,
     ...props
   }: ComponentProps<'h2'>): ReactElement {
-    setActiveAnchor = useSetActiveAnchor()
+    setActiveAnchor ??= useSetActiveAnchor()
     const obRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-      if (!obRef.current) return
+      const heading = obRef.current
+      if (!heading) return
 
-      slugs.set(obRef.current, [id, (context.index += 1)])
-      if (obRef.current) observer.observe(obRef.current)
+      slugs.set(heading, [id, (context.index += 1)])
+      observer.observe(heading)
 
       return () => {
         observer.disconnect()
-        slugs.delete(obRef.current!)
+        slugs.delete(heading)
         setActiveAnchor(f => {
           const ret = { ...f }
           delete ret[id!]
@@ -108,7 +110,7 @@ const createHeaderLink = (
         className={cn(
           'font-semibold tracking-tight',
           {
-            h2: 'mt-10 text-3xl border-b pb-1 dark:border-primary-100/10',
+            h2: 'mt-10 text-3xl border-b pb-1 dark:border-primary-100/10 contrast-more:border-neutral-400 contrast-more:dark:border-neutral-400',
             h3: 'mt-8 text-2xl',
             h4: 'mt-8 text-xl',
             h5: 'mt-8 text-lg',
@@ -164,11 +166,23 @@ const Details = ({
   const [openState, setOpen] = useState(!!open)
   const [summary, restChildren] = findSummary(children)
 
+  // To animate the close animation we have to delay the DOM node state here.
+  const [delayedOpenState, setDelayedOpenState] = useState(openState)
+  useEffect(() => {
+    if (openState) {
+      setDelayedOpenState(true)
+    } else {
+      const timeout = setTimeout(() => setDelayedOpenState(openState), 500)
+      return () => clearTimeout(timeout)
+    }
+  }, [openState])
+
   return (
     <details
       className="my-4 rounded border border-gray-200 bg-white p-2 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 first:mt-0 last:mb-0"
       {...props}
-      {...(openState && { open: true })}
+      open={delayedOpenState}
+      {...(openState && { 'data-expanded': true })}
     >
       <DetailsProvider value={setOpen}>{summary}</DetailsProvider>
       <Collapse open={openState}>{restChildren}</Collapse>
@@ -181,9 +195,9 @@ const Summary = (props: ComponentProps<'summary'>): ReactElement => {
   return (
     <summary
       className={cn(
-        'list-none cursor-pointer rounded p-1 outline-none transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800',
-        "before:content-[''] before:inline-block before:transition-transform dark:before:invert",
-        '[[open]>&]:before:rotate-90 rtl:before:rotate-180'
+        'list-none cursor-pointer p-1 transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800',
+        "before:mr-1 before:content-[''] before:inline-block before:transition-transform dark:before:invert",
+        '[[data-expanded]>&]:before:rotate-90 rtl:before:rotate-180'
       )}
       {...props}
       onClick={e => {
@@ -195,12 +209,7 @@ const Summary = (props: ComponentProps<'summary'>): ReactElement => {
 }
 
 const A = ({ href = '', ...props }) => (
-  <Anchor
-    href={href}
-    newWindow={href.startsWith('https://')}
-    className="ring-primary-500/30 focus:outline-none focus-visible:ring"
-    {...props}
-  />
+  <Anchor href={href} newWindow={href.startsWith('https://')} {...props} />
 )
 
 export const getComponents = ({
@@ -243,40 +252,25 @@ export const getComponents = ({
     hr: (props: ComponentProps<'hr'>) => (
       <hr className="my-8 dark:border-gray-900" {...props} />
     ),
-    a: A,
+    a: props => (
+      <A
+        {...props}
+        className="text-primary-500 underline decoration-from-font [text-underline-position:under]"
+      />
+    ),
     table: (props: ComponentProps<'table'>) => (
-      <table className="mt-6 first:mt-0 p-0" {...props} />
+      <Table className="nextra-scrollbar mt-6 first:mt-0 p-0" {...props} />
     ),
     p: (props: ComponentProps<'p'>) => (
-      <p className="mt-6 first:mt-0" {...props} />
+      <p className="mt-6 first:mt-0 leading-7" {...props} />
     ),
-    tr: (props: ComponentProps<'tr'>) => (
-      <tr
-        className={cn(
-          'm-0 border-t border-gray-300 p-0 dark:border-gray-600',
-          'even:bg-gray-100 even:dark:bg-gray-600/20'
-        )}
-        {...props}
-      />
-    ),
-    th: (props: ComponentProps<'th'>) => (
-      <th
-        className="m-0 border border-gray-300 px-4 py-2 dark:border-gray-600 font-semibold"
-        {...props}
-      />
-    ),
-    td: (props: ComponentProps<'td'>) => (
-      <td
-        className="m-0 border border-gray-300 px-4 py-2 dark:border-gray-600"
-        {...props}
-      />
-    ),
-    code: (props: ComponentProps<'code'>) => (
-      // always show code blocks in ltr
-      <code dir="ltr" {...props} />
-    ),
+    tr: Tr,
+    th: Th,
+    td: Td,
     details: Details,
     summary: Summary,
+    pre: Pre,
+    code: Code,
     ...components
   }
 }

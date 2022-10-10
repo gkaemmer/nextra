@@ -1,28 +1,42 @@
-import { PageMapItem } from './types'
-import { parseFileName } from './utils'
-import path from 'path'
+import path from 'node:path'
+import { FileMap, MdxPath, MetaJsonPath, PageMapItem } from './types'
+import { META_FILENAME } from './constants'
+import { normalizeMeta, parseFileName } from './utils'
 import filterRouteLocale from './filter-route-locale'
 
-export function getPageMap(
-  currentResourcePath: string,
-  pageMap: PageMapItem[],
-  fileMap: Record<string, PageMapItem>,
+type PageMapProps = {
+  filePath: string
+  pageMap: PageMapItem[]
+  fileMap: FileMap
   defaultLocale: string
-): [PageMapItem[], string, string] {
-  const activeRouteLocale = parseFileName(currentResourcePath).locale
-  const pageItem = fileMap[currentResourcePath]
-  const metaPath = path.dirname(currentResourcePath)
-  const metaExtension = activeRouteLocale ? `${activeRouteLocale}.json` : `json`
-  const pageMeta =
-    fileMap[`${metaPath}/meta.${metaExtension}`]?.meta?.[pageItem.name]
-  const title =
-    (typeof pageMeta === 'string' ? pageMeta : pageMeta?.title) || pageItem.name
+}
 
-  return [
-    activeRouteLocale
-      ? filterRouteLocale(pageMap, activeRouteLocale, defaultLocale)
+export function getPageMap({
+  filePath,
+  pageMap,
+  fileMap,
+  defaultLocale
+}: PageMapProps): {
+  title: string
+  route: string
+  pageMap: PageMapItem[]
+} {
+  const { locale } = parseFileName(filePath)
+  const pageItem = fileMap[filePath as MdxPath]
+
+  const metaFilename = locale
+    ? META_FILENAME.replace('.', `.${locale}.`)
+    : META_FILENAME
+  const metaDir = path.dirname(filePath)
+  const metaPath = path.join(metaDir, metaFilename) as MetaJsonPath
+
+  const pageMeta = fileMap[metaPath].data[pageItem.name]
+
+  return {
+    pageMap: locale
+      ? filterRouteLocale(pageMap, locale, defaultLocale)
       : pageMap,
-    pageItem.route,
-    title
-  ]
+    title: normalizeMeta(pageMeta).title,
+    route: pageItem.route
+  }
 }

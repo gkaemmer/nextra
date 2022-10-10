@@ -1,8 +1,16 @@
+import next from 'next/package.json'
 import { NextraPlugin, pageMapCache } from './plugin'
-import { DEFAULT_LOCALE, MARKDOWN_EXTENSION_REGEX } from './constants'
+import {
+  DEFAULT_LOCALE,
+  MARKDOWN_EXTENSION_REGEX,
+  MARKDOWN_EXTENSIONS
+} from './constants'
 
 const DEFAULT_EXTENSIONS = ['js', 'jsx', 'ts', 'tsx']
-const MARKDOWN_EXTENSIONS = ['md', 'mdx']
+
+const [major, minor] = next.version.split('.').map(Number)
+const nextVersion = major + (0.1 * minor)
+const hasFutureImage = nextVersion >= 12.3
 
 const nextra = (...config) =>
   function withNextra(nextConfig = {}) {
@@ -37,7 +45,8 @@ const nextra = (...config) =>
           locales: nextConfig.i18n?.locales || [DEFAULT_LOCALE],
           defaultLocale: nextConfig.i18n?.defaultLocale || DEFAULT_LOCALE,
           pageMapCache,
-          newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior
+          newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior,
+          allowFutureImage: hasFutureImage
         }
 
         config.module.rules.push(

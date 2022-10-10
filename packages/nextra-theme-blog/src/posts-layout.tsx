@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
 import { useBlogContext } from './blog-context'
 import { BasicLayout } from './basic-layout'
-import MDXTheme from './mdx-theme'
+import { MDXTheme } from './mdx-theme'
 import Nav from './nav'
 import { collectPostsAndNavs } from './utils/collect'
 import getTags from './utils/get-tags'
@@ -12,9 +12,7 @@ export const PostsLayout = ({ children }: { children: ReactNode }) => {
   const { config, opts } = useBlogContext()
   const { posts } = collectPostsAndNavs({ config, opts })
   const router = useRouter()
-  const {
-    meta: { type }
-  } = opts
+  const { type } = opts.frontMatter
   const tagName = type === 'tag' ? router.query.tag : null
   const postList = posts.map(post => {
     if (tagName) {

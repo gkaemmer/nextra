@@ -3,12 +3,17 @@ import { Processor } from '@mdx-js/mdx/lib/core'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
 import { rehypeMdxTitle } from 'rehype-mdx-title'
-import { remarkStaticImage } from './mdx-plugins/static-image'
-import { remarkHeadings } from './mdx-plugins/remark'
-import { LoaderOptions, PageOpts } from './types'
-import structurize from './mdx-plugins/structurize'
-import { parseMeta, attachMeta } from './mdx-plugins/rehype-handler'
+import readingTime from 'remark-reading-time'
+import {
+  remarkStaticImage,
+  remarkHeadings,
+  structurize,
+  parseMeta,
+  attachMeta
+} from './mdx-plugins'
+import { LoaderOptions, PageOpts, ReadingTime } from './types'
 import theme from './theme.json'
+import { truthy } from './utils'
 
 const createCompiler = (mdxOptions: ProcessorOptions): Processor => {
   const compiler = createProcessor(mdxOptions)
@@ -37,29 +42,39 @@ const rehypePrettyCodeOptions = {
 
 export async function compileMdx(
   source: string,
-  mdxOptions: LoaderOptions['mdxOptions'] &
-    Pick<ProcessorOptions, 'jsx' | 'outputFormat'> = {},
-  nextraOptions: Pick<
+  loaderOptions: Pick<
     LoaderOptions,
-    'unstable_staticImage' | 'unstable_flexsearch'
-  > = {},
-  resourcePath = ''
+    | 'unstable_staticImage'
+    | 'unstable_flexsearch'
+    | 'unstable_defaultShowCopyCode'
+    | 'unstable_readingTime'
+    | 'allowFutureImage'
+  > & {
+    mdxOptions?: LoaderOptions['mdxOptions'] &
+      Pick<ProcessorOptions, 'jsx' | 'outputFormat'>
+  } = {},
+  filePath = ''
 ) {
-  const structurizedData = {}
+  const structurizedData = Object.create(null)
+
+  const mdxOptions = loaderOptions.mdxOptions || {}
+
   const compiler = createCompiler({
-    jsx: mdxOptions.jsx ?? true,
-    outputFormat: mdxOptions.outputFormat,
+    jsx: mdxOptions.jsx || false,
+    outputFormat: mdxOptions.outputFormat || 'function-body',
     providerImportSource: '@mdx-js/react',
     remarkPlugins: [
       ...(mdxOptions.remarkPlugins || []),
       remarkGfm,
       remarkHeadings,
-      ...(nextraOptions.unstable_staticImage ? [remarkStaticImage] : []),
-      ...(nextraOptions.unstable_flexsearch
-        ? [structurize(structurizedData, nextraOptions.unstable_flexsearch)]
-        : [])
-    ].filter(Boolean),
-    // @ts-ignore
+      loaderOptions.unstable_staticImage && [
+        remarkStaticImage,
+        { allowFutureImage: loaderOptions.allowFutureImage, filePath }
+      ] as any,
+      loaderOptions.unstable_flexsearch &&
+        structurize(structurizedData, loaderOptions.unstable_flexsearch),
+      loaderOptions.unstable_readingTime && readingTime
+    ].filter(truthy),
     rehypePlugins: [
       ...(mdxOptions.rehypePlugins || []),
       parseMeta,
@@ -68,24 +83,29 @@ export async function compileMdx(
         { ...rehypePrettyCodeOptions, ...mdxOptions.rehypePrettyCodeOptions }
       ],
       [rehypeMdxTitle, { name: '__nextra_title__' }],
-      attachMeta
-    ].filter(Boolean)
+      [
+        attachMeta,
+        { defaultShowCopyCode: loaderOptions.unstable_defaultShowCopyCode }
+      ]
+    ]
   })
   try {
-    const result = String(await compiler.process(source))
+    const vFile = await compiler.process(source)
+    const result = String(vFile)
       .replace('export const __nextra_title__', 'const __nextra_title__')
       .replace('export default MDXContent;', '')
-
+    const readingTime = vFile.data.readingTime as ReadingTime | undefined
     return {
       result,
       ...(compiler.data('headingMeta') as Pick<
         PageOpts,
         'headings' | 'hasJsxInH1'
       >),
+      ...(readingTime && { readingTime }),
       structurizedData
     }
   } catch (err) {
-    console.error(`[nextra] Error compiling ${resourcePath}.`)
+    console.error(`[nextra] Error compiling ${filePath}.`)
     throw err
   }
 }

@@ -1,28 +1,31 @@
-import React from 'react'
+import React, { ReactElement } from 'react'
+import { useMounted } from 'nextra/hooks'
 import { useConfig } from '../contexts'
-import { renderComponent, useMounted, getGitIssueUrl } from '../utils'
+import { renderComponent, getGitIssueUrl } from '../utils'
 import { useRouter } from 'next/router'
 import { Anchor } from './anchor'
 
-export function NotFoundPage() {
+export function NotFoundPage(): ReactElement | null {
   const config = useConfig()
   const mounted = useMounted()
   const { asPath } = useRouter()
-  if (!config.notFoundLink) {
+  const { content, labels } = config.notFound
+  if (!content) {
     return null
   }
 
   return (
-    <p>
+    <p className="text-center">
       <Anchor
         href={getGitIssueUrl({
           repository: config.docsRepositoryBase,
           title: `Found broken \`${mounted ? asPath : ''}\` link. Please fix!`,
-          labels: config.notFoundLabels
+          labels
         })}
         newWindow
+        className="text-primary-500 underline decoration-from-font [text-underline-position:under]"
       >
-        {renderComponent(config.notFoundLink)}
+        {renderComponent(content)}
       </Anchor>
     </p>
   )

@@ -1,5 +1,127 @@
 # nextra-theme-docs
 
+## 2.0.0-beta.29
+
+### Patch Changes
+
+- 973ca49: fix rtl/ltr glitch on initial loading
+
+## 2.0.0-beta.28
+
+### Patch Changes
+
+- c2c0d90: fix(search): handle case when value is empty
+
+## 2.0.0-beta.27
+
+### Patch Changes
+
+- 21009c7: fix covered select options
+- 21009c7: better focus ui, use ring color as theme hue color
+
+## 2.0.0-beta.26
+
+### Patch Changes
+
+- a0e5847: Rename some docs theme configurations
+
+## 2.0.0-beta.25
+
+### Patch Changes
+
+- 4731fa7: Style improvements
+- e4cfb83: define page title in sidebar from `frontMatter.title` if page is not specified in `_meta.json`
+- 9064112: make `<Tab />` accept `ComponentProps<'div'>`
+- c3e6227: add `overflow-x-scroll` for tables
+- d6d5ab8: Make sure arrows are aligned
+- ab6c0e6: fix disappearing toc issue in Firefox
+- ff8967c: add `Toggle Word Wrap` button for code-blocks (only for mobile)
+- ff8967c: fix missing `Copy Code` button in code-blocks without language
+- e2d603a: remove `getComponents` export, export `useMDXComponents` from `@mdx-js/react` instead
+- 256154a: use "next/future/image" if `"experimental.images.allowFutureImage": true` is set in next config
+- 256154a: replace images with `<NextImage />` even when url not relative but that starts from `/` (public directory)
+- c4a9782: support custom hue theme color via `primaryHue`, `primaryHue.dark` and `primaryHue.light` theme options
+- c3e6227: reuse nextra's scrollbar-y styles for scrollbar-x, adjust sidebar's scrollbar-y
+
+## 2.0.0-beta.24
+
+### Patch Changes
+
+- bc52178: fix `editLink` option was not merged with default config `editLink`
+
+## 2.0.0-beta.23
+
+### Patch Changes
+
+- c8129a2: fix theme switcher style
+- 2ec8564: add `DocsThemeConfig.navbar` config option for overriding navbar
+
+## 2.0.0-beta.22
+
+### Patch Changes
+
+- 77361da: fix ESC button when still stays after pressed ESC
+- fdfe4f8: fix covered theme switch popup when i18n is not setup
+- 873561b: scrollbar is toc should be same as in sidebar
+
+## 2.0.0-beta.21
+
+## 2.0.0-beta.20
+
+### Patch Changes
+
+- e6771ca: fix search overlay styles on mobile
+- e6771ca: split css to `hamburger`/`scrollbar`/`typesetting-article` css files
+- e6771ca: fix edit on github button for cases when filename named as `index`
+- e6771ca: BREAKING! various theme config options was renamed, take a look of renamed options [here](https://github.com/shuding/nextra/blob/core/packages/nextra-theme-docs/src/constants.tsx)
+- 1ee3c92: reuse table styles from docs in blog
+- e6771ca: [Blog/Docs] Add copy to clipboard button for code-blocks. Add `NextraConfig.unstable_defaultShowCopyCode` option to show button by default, add `copy` and `copy=false` options for code-blocks
+- 5d852b6: break words in navlinks, remove unneeded `<div />` wrappers, align text on right side for next link
+- e6771ca: hide search input in navbar on mobile
+- e6771ca: fix empty space in navbar when theme option `search.component: null`
+- e6771ca: add `editLink.component`
+- e6771ca: rename `meta.json` to `_meta.json`
+- e6771ca: clicking on folder should navigate to first children if `index` page doesn't exist
+- 71528f1: show copy code button only on hover of container
+- e6771ca: fix callout shrinking from children content
+- e6771ca: rename `PageOpts.meta` to `PageOpts.frontMatter`
+- e6771ca: move `withLayout` logic directly in nextra loader
+- e6771ca: adjust active breadcrumb color
+- e6771ca: fix search input `ESC` icon vertical alignment
+
+## 2.0.0-beta.19
+
+### Patch Changes
+
+- 1fef548: allow head to be a ReactNode
+- ee270a4: fix extra space in flexsearch input after loading indexes
+- afaa26a: refactor toc, fix toc's styles on rtl, use `ref.current` instead `document.getElementsByClassName`
+- cdc1c2f: prefer `ref.current` over `document.querySelector` in sidebar
+
+## 2.0.0-beta.18
+
+### Patch Changes
+
+- 7a32f8e: remove unneeded wrappers `<div />`s in `<Navbar />`
+- bea62a1: make the search input responsive in narrow screens
+- 24a02f8: reuse Flexsearch result styles on match-sorter search
+- a0c0eb8: allow override `MDXProvider.components`
+- 16bedce: `"layout": "raw"` should render `all` unstyled elements, except `<a />`
+- 237faa9: add clear button for search input
+- 24a02f8: typescripify `<Flexsearch />`
+- 24a02f8: fix all RTL broken styles
+- a8c5883: add `config.bodyExtraContent` option
+- 8564919: extract `<Input/>` from `<Search/>` and `<Flexsearch/>`
+- 38769ca: prefer `ref.current.querySelector` over `document.querySelector`, remove `load` prop in `<Search />`
+- 24a02f8: match-sorter search should highlight every match like flexsearch
+- 7bcbc98: add new `meta.json#theme.timestamp` option to hide `Last updated on ...`
+- d16b2ba: move contexts to `./contexts` directory
+- 47938b1: remove unneeded `useRef` for `<details />`
+- 7373c1f: fix `useConfig`/`useRouter` inside `head()`
+- a9ca0b9: do not add `basePath` to the links
+- 0af6e79: `"layout": "raw"` should have unstyled `<a />` and `<p />` elements as well
+- f99bbc2: Add `nextra-body-typesetting-article` back
+
 ## 2.0.0-beta.17
 
 ### Patch Changes

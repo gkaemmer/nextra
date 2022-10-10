@@ -1,5 +1,84 @@
 # nextra
 
+## 2.0.0-beta.29
+
+## 2.0.0-beta.28
+
+## 2.0.0-beta.27
+
+### Patch Changes
+
+- d7e7f5b: do not add `placeholder="blur"` on `.svg` static images
+- a9523c9: fix nextra on webcontainers
+- 21009c7: better focus ui, use ring color as theme hue color
+
+## 2.0.0-beta.26
+
+### Patch Changes
+
+- b365bb0: fix TypeError: Cannot read properties of undefined (reading 'data')
+- a0e5847: Rename some docs theme configurations
+
+## 2.0.0-beta.25
+
+### Patch Changes
+
+- e4cfb83: `addPage` no longer need accept `frontMatter`
+- e4cfb83: define page title in sidebar from `frontMatter.title` if page is not specified in `_meta.json`
+- c3e6227: add `overflow-x-scroll` for tables
+- 93d028b: use `title` package in nextra to determine sidebar title based on pagename
+- ff8967c: add `Toggle Word Wrap` button for code-blocks (only for mobile)
+- ff8967c: fix missing `Copy Code` button in code-blocks without language
+- 256154a: use "next/future/image" if `"experimental.images.allowFutureImage": true` is set in next config
+- 256154a: replace images with `<NextImage />` even when url not relative but that starts from `/` (public directory)
+
+## 2.0.0-beta.24
+
+### Patch Changes
+
+- a2bc427: compile `context.ts`, `ssg.ts` and `locales.ts` to esm
+
+## 2.0.0-beta.23
+
+## 2.0.0-beta.22
+
+### Patch Changes
+
+- 8dab966: fix invisible copy button in code blocks
+
+## 2.0.0-beta.21
+
+### Patch Changes
+
+- 568282e: fix broken build `SyntaxError: Unexpected token '}'`
+
+## 2.0.0-beta.20
+
+### Patch Changes
+
+- e6771ca: fix edit on github button for cases when filename named as `index`
+- e6771ca: fix `ReferenceError` when trying to access `__nextra_pageOpts__` inside MDX file
+- 1ee3c92: reuse table styles from docs in blog
+- e6771ca: [Blog/Docs] Add copy to clipboard button for code-blocks. Add `NextraConfig.unstable_defaultShowCopyCode` option to show button by default, add `copy` and `copy=false` options for code-blocks
+- e6771ca: rename `meta.json` to `_meta.json`
+- 64ae4b5: add `nextraConfig.unstable_readingTime` option for blog theme
+- e6771ca: better loader types, add `MetaJsonFile`, `MdxFile`, `Folder` types
+- 71528f1: show copy code button only on hover of container
+- e6771ca: rename `PageOpts.meta` to `PageOpts.frontMatter`
+- e6771ca: move `withLayout` logic directly in nextra loader
+
+## 2.0.0-beta.19
+
+### Patch Changes
+
+- 37b4445: fix react-dom peer dependency version
+
+## 2.0.0-beta.18
+
+### Patch Changes
+
+- 803553c: use `findPagesDir` from `next/dist/lib/find-pages-dir`
+
 ## 2.0.0-beta.17
 
 ### Patch Changes

@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode } from 'react'
+import React, { ComponentProps, ReactElement, ReactNode } from 'react'
 import cn from 'clsx'
 import { Tab as HeadlessTab } from '@headlessui/react'
 
@@ -54,8 +54,9 @@ export function Tabs({
                 disabled={disabled}
                 className={({ selected }) =>
                   cn(
+                    'rounded-t',
                     'text-md mr-2 p-2 font-medium leading-5 transition-colors',
-                    '-mb-0.5 select-none rounded-[1px] border-b-2 ring-offset-2 focus:outline-none focus-visible:ring',
+                    '-mb-0.5 select-none border-b-2',
                     selected
                       ? 'border-primary-500 text-primary-500'
                       : 'border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white',
@@ -75,9 +76,12 @@ export function Tabs({
   )
 }
 
-export function Tab({ children }: { children: ReactNode }): ReactElement {
+export function Tab({
+  children,
+  ...props
+}: ComponentProps<'div'>): ReactElement {
   return (
-    <HeadlessTab.Panel className="focus:outline-none focus-visible:ring">
+    <HeadlessTab.Panel {...props} className="rounded">
       {children}
     </HeadlessTab.Panel>
   )

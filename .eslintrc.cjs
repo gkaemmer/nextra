@@ -9,13 +9,30 @@ module.exports = {
   overrides: [
     {
       // TODO: enable for `nextra-theme-blog` also
-      files: 'packages/nextra-theme-docs/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}',
+      files: 'packages/nextra-theme-docs/**/*',
+      plugins: ['typescript-sort-keys'],
       rules: {
         'no-restricted-imports': [
           'error',
           {
             name: 'next/link',
             message: 'Use local <Anchor /> instead'
+          }
+        ]
+      }
+    },
+    {
+      files: 'packages/nextra/src/**/*',
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['fs', 'node:fs'],
+                message: 'Use `graceful-fs` instead'
+              }
+            ]
           }
         ]
       }

@@ -1,5 +1,54 @@
 # nextra-theme-blog
 
+## 2.0.0-beta.29
+
+## 2.0.0-beta.28
+
+## 2.0.0-beta.27
+
+## 2.0.0-beta.26
+
+## 2.0.0-beta.25
+
+### Patch Changes
+
+- c3e6227: add `overflow-x-scroll` for tables
+- ff8967c: add `Toggle Word Wrap` button for code-blocks (only for mobile)
+- ff8967c: fix missing `Copy Code` button in code-blocks without language
+- 256154a: use "next/future/image" if `"experimental.images.allowFutureImage": true` is set in next config
+- 256154a: replace images with `<NextImage />` even when url not relative but that starts from `/` (public directory)
+
+## 2.0.0-beta.24
+
+## 2.0.0-beta.23
+
+## 2.0.0-beta.22
+
+### Patch Changes
+
+- 8dab966: fix invisible copy button in code blocks
+
+## 2.0.0-beta.21
+
+## 2.0.0-beta.20
+
+### Patch Changes
+
+- 1ee3c92: reuse table styles from docs in blog
+- e6771ca: [Blog/Docs] Add copy to clipboard button for code-blocks. Add `NextraConfig.unstable_defaultShowCopyCode` option to show button by default, add `copy` and `copy=false` options for code-blocks
+- 64ae4b5: add `nextraConfig.unstable_readingTime` option for blog theme
+- 71528f1: show copy code button only on hover of container
+- e6771ca: rename `PageOpts.meta` to `PageOpts.frontMatter`
+- e6771ca: move `withLayout` logic directly in nextra loader
+
+## 2.0.0-beta.19
+
+## 2.0.0-beta.18
+
+### Patch Changes
+
+- 0518b1b: improve tags styling
+
 ## 2.0.0-beta.17
 
 ### Patch Changes
