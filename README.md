@@ -6,7 +6,7 @@ features for Oso's docs site.
 This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/core):
 
 - It adds the ability to have "sidebar sections" by including an `isSection` option in `_meta.json`:
-  ```json
+  ```js
   // in _meta.json
   "get-started": {
     "title": "Get Started",
@@ -14,9 +14,9 @@ This fork makes only tiny changes to [the `nextra` origin](https://github.com/sh
   },
   // ...
   ```
-  ![Sidebar sections enabled by this fork](sidebarSections.png)
+  <img width="200" alt="Sidebar sections enabled by this fork" src="sidebarSections.png" />
 - It adds the ability to insert custom header content (which we use for inserting links):
-  ![Header links enabled by this fork](headerLinks.png)
+  <img width="300" alt="Header links enabled by this fork" src="headerLinks.png" />
 
 **Note**: the custom header content change will no longer be needed once this upstream PR lands (it does the same thing): https://github.com/shuding/nextra/pull/907
 
