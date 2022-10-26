@@ -3,6 +3,23 @@
 This fork slightly customizes the `nextra-theme-docs` theme to enable custom
 features for Oso's docs site.
 
+This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/core):
+
+- It adds the ability to have "sidebar sections" by including an `isSection` option in `_meta.json`:
+  ```json
+  // in _meta.json
+  "get-started": {
+    "title": "Get Started",
+    "isSection": true // this gives this element `section` class in the sidebar
+  },
+  // ...
+  ```
+  ![Sidebar sections enabled by this fork](sidebarSections.png)
+- It adds the ability to insert custom header content (which we use for inserting links):
+  ![Header links enabled by this fork](headerLinks.png)
+
+**Note**: the custom header content change will no longer be needed once this upstream PR lands (it does the same thing): https://github.com/shuding/nextra/pull/907
+
 **Ideally in the future Nextra is suitably customizable that we don't need this
 repo at all. We should try to make as few changes as possible to make merging
 upstream changes easier.**
@@ -48,6 +65,40 @@ changes to this repo):
 cd packages/nextra-theme-docs
 npm publish
 ```
+
+## Pulling in changes from upstream
+
+If you haven't already, add the upstream origin:
+```
+git remote add upstream git@github.com:shuding/nextra.git
+```
+
+Fetch and merge the `core` branch:
+```
+git fetch upstream core
+git merge upstream/core
+```
+
+**Note**: Merging is probably preferable to rebasing -- you'll have a bad time re-applying all the commits.
+
+### Resolving merge conflicts
+
+This should be pretty straightforward, as all oso-specific changes are marked with a comment:
+```js
+// Example from sidebar.tsx
+className={cn(
+  'gap-2 items-center justify-between',
+  classes.link,
+  active ? classes.active : classes.inactive,
+  // BEGIN OSO-SPECIFIC CODE: add a section class
+  isSection ? 'section' : ''
+  // END OSO-SPECIFIC CODE
+)}
+```
+
+There can be times when files have entirely moved. These are trickier things to
+merge, but it's helpful to remember that we only have to maintain the few
+changes in this fork. Otherwise, the code should be exactly the same.
 
 NOTE: Original README.md below this line.
 
