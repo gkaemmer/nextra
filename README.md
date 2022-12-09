@@ -51,6 +51,11 @@ npm run local-theme
 Then, you should be able to make changes to `packages/nextra-theme-docs` and see
 those changes reflected in the Oso Cloud Docs.
 
+Note that if upstream Nextra has added new dependencies, you will probably get an error
+about a missing import on this step. `local-deps` doesn't pull in `nextra-theme-docs-oso`'s
+dependencies, for some reason. The workaround is to add the missing dependencies directly to
+`oso-service/docs/package.json` while you're developing. (You won't need to commit those changes.)
+
 ## Publishing
 
 When it comes time to publish your changes to `nextra-theme-docs-oso`, just run
