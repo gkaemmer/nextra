@@ -4,7 +4,6 @@ import path from 'node:path'
 import grayMatter from 'gray-matter'
 import slash from 'slash'
 import { LoaderContext } from 'webpack'
-import { findPagesDir } from 'next/dist/lib/find-pages-dir.js'
 
 import { addPage } from './content-dump'
 import { parseFileName } from './utils'
@@ -18,8 +17,9 @@ import {
   MARKDOWN_EXTENSION_REGEX,
   CWD
 } from './constants'
+import { findPagesDirectory } from './file-system'
 
-const PAGES_DIR = findPagesDir(CWD).pages as string
+const PAGES_DIR = findPagesDirectory()
 
 // TODO: create this as a webpack plugin.
 const indexContentEmitted = new Set<string>()
@@ -65,14 +65,13 @@ async function loader(
     theme,
     themeConfig,
     defaultLocale,
-    unstable_defaultShowCopyCode,
-    unstable_flexsearch,
-    unstable_staticImage,
-    unstable_readingTime,
+    defaultShowCopyCode,
+    flexsearch,
+    staticImage,
+    readingTime: _readingTime,
     mdxOptions,
     pageMapCache,
-    newNextLinkBehavior,
-    allowFutureImage
+    newNextLinkBehavior
   } = context.getOptions()
 
   context.cacheable(true)
@@ -122,13 +121,12 @@ async function loader(
         mdxOptions: {
           ...mdxOptions,
           jsx: true,
-          outputFormat: 'program',
+          outputFormat: 'program'
         },
-        unstable_readingTime,
-        unstable_defaultShowCopyCode,
-        unstable_staticImage,
-        unstable_flexsearch,
-        allowFutureImage
+        readingTime: _readingTime,
+        defaultShowCopyCode,
+        staticImage,
+        flexsearch
       },
       mdxPath
     )
@@ -154,7 +152,7 @@ export default MDXContent`.trimStart()
 
   const skipFlexsearchIndexing =
     IS_PRODUCTION && indexContentEmitted.has(mdxPath)
-  if (unstable_flexsearch && !skipFlexsearchIndexing) {
+  if (flexsearch && !skipFlexsearchIndexing) {
     if (frontMatter.searchable !== false) {
       addPage({
         locale: locale || DEFAULT_LOCALE,
@@ -194,7 +192,7 @@ export default MDXContent`.trimStart()
     headings,
     hasJsxInH1,
     timestamp,
-    unstable_flexsearch,
+    flexsearch,
     newNextLinkBehavior,
     readingTime
   }

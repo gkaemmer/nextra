@@ -5,10 +5,10 @@ title: 'Nextra – Next.js Static Site Generator'
 import Link from 'next/link'
 import cn from 'clsx'
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion } from "framer-motion"
 
 import { Features, Feature } from '@components/features'
-import { ThemesAnimation } from '@components/features/themes-animation'
 
 import styles from './index.module.css'
 
@@ -40,18 +40,23 @@ export function I18n() {
     <div
       style={{ display: 'flex', flexDirection: 'column' }}
       className="menu bg-white dark:bg-neutral-800 dark:ring-white dark:ring-opacity-20 shadow-lg rounded-md py-1 ring-1 ring-black ring-opacity-5 overflow-auto text-sm">
-      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'en' ? 'text-primary-500 bg-primary-50 dark:bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('en')}>English</span>
-      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'de' ? 'text-primary-500 bg-primary-50 dark:bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('de')}>Deutsch</span>
-      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'ja' ? 'text-primary-500 bg-primary-50 dark:bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('ja')}>日本語</span>
+      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'en' ? 'nx-text-primary-600 nx-bg-primary-50 dark:nx-bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('en')}>English</span>
+      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'de' ? 'nx-text-primary-600 nx-bg-primary-50 dark:nx-bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('de')}>Deutsch</span>
+      <span className={cn("cursor-default select-none relative py-1.5 px-4 whitespace-nowrap", active === 'ja' ? 'nx-text-primary-600 nx-bg-primary-50 dark:nx-bg-primary-500/10' : 'text-gray-800 dark:text-gray-100 ')} onPointerOver={() => setActive('ja')}>日本語</span>
     </div>
   }/>
 }
 
+import docsCard from '../public/assets/card-1.png'
+import docsCardDark from '../public/assets/card-1.dark.png'
+
 <div className="home-content">
   <div className="content-container">
-    <h1 className="headline">Make beautiful websites <br/>with Next.js & MDX.</h1>
-    <p className="subtitle">Simple, powerful and flexible site generation framework <br/>with everything you love from <a className="nextjs-link" href="https://nextjs.org" target="_blank">Next.js</a>.</p>
-    <p className="subtitle"><Link href="/docs"><a>Start →</a></Link></p>
+    <h1 className="headline">Make beautiful websites <br className='sm:block hidden'/>with Next.js & MDX.</h1>
+    <p className="subtitle">Simple, powerful and flexible site generation framework <br className='sm:block hidden'/>with everything you love from <a className="nextjs-link" href="https://nextjs.org" target="_blank">Next.js</a>.</p>
+    <p className="subtitle">
+      <Link className={styles.cta} href="/docs">Get started <span>→</span></Link>
+    </p>
   </div>
 
   <style jsx>{`
@@ -62,16 +67,18 @@ export function I18n() {
       margin: 0 auto;
     }
     .features-container {
-      margin: 4rem 0;
+      margin: 8rem 0 0;
       padding: 4rem 0;
       background-color: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .features-container .content-container {
+      margin-top: -8rem;
     }
     :global(.dark) .features-container {
       background-color: #000;
+      border-bottom: 1px solid rgb(38,38,38);
     }
-  `}</style>
-
-  <style jsx>{`
     .headline {
       font-size: 3.125rem;
       font-size: min(4.375rem, max(8vw, 2.5rem));
@@ -94,14 +101,30 @@ export function I18n() {
       font-weight: 600;
     }
     :global(#docs-card) {
-      background-image: url(/assets/card-1.png);
-      background-size: cover;
       color: #fff;
-      text-shadow: 0 0 1rem rgba(0,0,0,0.2);
-      aspect-ratio: 135/86;
+      text-shadow: 0 0 1rem rgba(0,0,0,0.1);
     }
-    :global(.dark #docs-card) {
-      background-image: url(/assets/card-1.dark.png);
+    :global(#docs-card img) {
+      object-fit: cover;
+      object-position: left;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      z-index: 0;
+      user-select: none;
+      pointer-events: none;
+    }
+    :global(#docs-card img:nth-child(2)) {
+      display: none;
+    }
+    :global(.dark #docs-card img:nth-child(2)) {
+      display: initial;
+    }
+    :global(.dark #docs-card img:nth-child(1)) {
+      display: none;
     }
     :global(#highlighting-card) {
       min-height: 300px;
@@ -119,14 +142,40 @@ export function I18n() {
     :global(.feat-darkmode h3) {
       font-size: 48px;
     }
-    @media screen and (max-width: 1200px) {
-      :global(#docs-card) {
-        background-position: 0 0;
-        background-size: 136%;
-        min-height: 300px;
-        width: 100%;
-        aspect-ratio: auto;
+    :global(#search-card) {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    :global(#search-card p) {
+      max-width: 320px;
+    }
+    :global(#search-card video) {
+      position: absolute;
+      right: 0;
+      top: 24px;
+      height: 430px;
+      pointer-events: none;
+      max-width: 60%;
+    }
+    :global(#fs-card) {
+      min-height: 240px;
+    }
+    :global(#fs-card h3) {
+      text-align: left;
+      width: min(300px, 41%);
+      min-width: 155px;
+    }
+    :global(#a11y-card) {
+      background-image: url(/assets/high-contrast.png);
+      background-position: -160px 160px;
+    }
+    @media screen and (max-width: 1300px) {
+      :global(#a11y-card) {
+        background-image: linear-gradient(to bottom, white, transparent), url(/assets/high-contrast.png);
       }
+    }
+    @media screen and (max-width: 1200px) {
       :global(#highlighting-card) {
         aspect-ratio: auto;
       }
@@ -134,35 +183,113 @@ export function I18n() {
         font-size: 4vw;
         font-size: min(48px, max(4vw, 30px));
       }
+      :global(#search-card video) {
+        aspect-ratio: 787/623;
+        height: auto;
+      }
+      .headline {
+        letter-spacing: -.08rem;
+      }
+    }
+    @media screen and (max-width: 1024px) {
+      :global(#docs-card) {
+        aspect-ratio: 135/86;
+      }
+      :global(#search-card) {
+        aspect-ratio: 8/3;
+      }
+      :global(#search-card h3) {
+        text-align: left;
+      }
+      :global(#highlighting-card) {
+        background-size: 136%;
+      }
+      :global(#a11y-card) {
+        background-image: url(/assets/high-contrast.png);
+        background-position: center 160px;
+      }
+    }
+    @media screen and (max-width: 768px) {
+      :global(#docs-card) {
+        min-height: 348px;
+        width: 100%;
+        aspect-ratio: auto;
+      }
+      :global(#docs-card img) {
+        object-position: -26px 0;
+        width: 250%;
+        max-width: initial;
+      }
+    }
+    @media screen and (max-width: 640px) {
+      :global(#search-card) {
+        aspect-ratio: 2.5/2;
+        justify-content: flex-start;
+        align-items: stretch;
+        min-height: 350px;
+      }
+      :global(#search-card h3) {
+        text-align: center;
+      }
+      :global(#search-card p) {
+        max-width: 100%;
+      }
+      :global(#search-card video) {
+        position: relative;
+        margin: .75em -1.75em 0;
+        max-width: calc(100% + 3.5em);
+      }
+      :global(.dark #search-card video) {
+        mix-blend-mode: lighten;
+      }
     }
   `}</style>
 
   <div className="features-container">
     <div className="content-container">
       <Features>
-        <Feature large centered id="docs-card">
-          <h3>Full-power documentation in minutes.</h3>
+        <Feature index={0} large centered id="docs-card" href="/docs/docs-theme/start">
+          <Image src={docsCard} alt="Background" loading="eager" />
+          <Image src={docsCardDark} alt="Background (Dark)" loading="eager" />
+          <h3>Full-power documentation <br className="show-on-mobile"/>in minutes.</h3>
         </Feature>
-        <Feature centered lightOnly style={{ minHeight: 450 }}>
-          <h3>Pluggable docs, blog, <br/>or custom themes.</h3>
-          <ThemesAnimation style={{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: '100%',
-          }}/>
+        <Feature index={1} centered className="card-with-border" href="/docs/guide/image">
+          <div className="h-full flex flex-col justify-between">
+            <h3>Links and images are <br className="show-on-mobile"/>always <span style={{ fontWeight: 300 }}>optimized</span>.</h3>
+            <p className='text-left mb-8'>Nextra automatically converts Markdown links and images to use [Next.js Link](https://nextjs.org/docs/routing/introduction#linking-between-pages) and [Next.js Image](https://nextjs.org/docs/basic-features/image-optimization#local-images) when possible. No slow navigation or layout shift.</p>
+            <div>
+              <div className={styles.optimization}>
+                <div style={{ fontSize: '.9rem' }} className="leading-8">
+                  <code>{`[Learn more](/more)`}</code>
+                  <br/>
+                  <code>{`![Hero](/hero.png)`}</code>
+                </div>
+              </div>
+              <div className="flex justify-center text-neutral-400 my-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" viewBox="0 0 20 20" fill="currentColor" className="rotate-90">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className={styles.optimization}>
+                <div style={{ fontSize: '.9rem' }} className="leading-8">
+                  <code>{`<Link .../>`}</code>
+                  <br/>
+                  <code>{`<Image .../>`}</code>
+                </div>
+              </div>
+            </div>
+          </div>
         </Feature>
-        <Feature id="highlighting-card">
-          <h3>Advanced syntax highlighting solution.</h3>
+        <Feature index={2} id="highlighting-card" href="/docs/guide/syntax-highlighting">
+          <h3>Advanced syntax <br className="show-on-mobile"/>highlighting solution.</h3>
           <p>Performant and reliable build-time syntax highlighting powered by [Shiki](https://shiki.matsu.io).</p>
         </Feature>
-        <Feature>
-          <h3>I18n as easy as creating new files.</h3>
-          <p>Name your page files with locales suffixed, Nextra and Next.js will do the rest for you.</p>
-          <br/>
+        <Feature index={3} href="/docs/guide/i18n">
+          <h3>I18n as easy as <br className="show-on-mobile"/>creating new files.</h3>
+          <p className='mb-4'>Name your page files with locales suffixed, Nextra and Next.js will do the rest for you.</p>
           <I18n/>
         </Feature>
-        <Feature centered style={{
+        <Feature index={4} centered style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -171,7 +298,7 @@ export function I18n() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           color: '#fff'
-        }}>
+        }} href="/docs/guide/markdown">
           <svg width="70%" viewBox="0 0 69 29" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
             filter: 'drop-shadow(0 2px 10px rgba(0, 0, 0, .1))'
           }}>
@@ -179,13 +306,12 @@ export function I18n() {
           </svg>
           <p style={{
             textShadow: '0 2px 4px rgb(0 0 0 / 20%)'
-          }}><a href="https://mdxjs.com/blog/v2" target="_blank" style={{ color: 'currentColor' }}>MDX 2</a> lets you use Components inside Markdown, <br className="hide-medium"/>with huge performance boost since MDX v1.</p>
+          }}><a href="https://mdxjs.com/blog/v2" target="_blank" style={{ color: 'currentColor' }}>MDX 2</a> lets you use Components inside Markdown, <br className="hide-medium"/>with huge performance boost since v1.</p>
         </Feature>
-        <Feature centered className="feat-darkmode" style={{
+        <Feature index={5} centered className="feat-darkmode" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          // border: '1px solid #2a2a2a'
         }}>
           <motion.div
             animate={{
@@ -237,66 +363,48 @@ export function I18n() {
             }}
           >Dark <br/>mode <br/>included.</motion.h3>
         </Feature>
-        <Feature large lightOnly style={{
-          display: 'flex',
-          aspectRatio: '8/3',
-          flexDirection: 'column',
-          justifyContent: 'center'
-        }}>
-          <h3>Full-text search, <br/>zero-config needed.</h3>
-          <p style={{ maxWidth: 320 }}>Nextra indexes your content automatically at build-time and performs incredibly fast full-text search based on [FlexSearch](https://github.com/nextapps-de/flexsearch).</p>
-          <video autoPlay="autoplay" loop muted playsInline style={{
-            position: 'absolute',
-            right: 0,
-            top: 24,
-            height: 430,
-            pointerEvents: 'none',
-          }}>
+        <Feature index={6} large id="search-card" href="/docs/docs-theme/theme-configuration#search">
+          <div style={{ zIndex: 2}}>
+            <h3>Full-text search, <br/>zero-config needed.</h3>
+            <p>Nextra indexes your content automatically at build-time and performs incredibly fast full-text search via [FlexSearch](https://github.com/nextapps-de/flexsearch).</p>
+          </div>
+          <div className="absolute w-full h-full inset-0 hidden sm:block bg-[linear-gradient(to_right,white_250px,_transparent)] dark:bg-[linear-gradient(to_right,#202020_250px,_transparent)] z-[1]"/>
+          <video autoPlay="autoplay" loop muted playsInline className="dark:hidden block">
             <source src="/assets/search.mp4" type="video/mp4"/>
           </video>
+          <video autoPlay="autoplay" loop muted playsInline className="dark:block hidden -translate-x-4">
+            <source src="/assets/search-dark.mp4" type="video/mp4"/>
+          </video>
         </Feature>
-        <Feature large style={{
+        <Feature index={7} large id="fs-card" style={{
           color: 'white',
           backgroundImage: 'url(/assets/routing.png), url(/assets/gradient-bg.jpeg)',
           backgroundSize: '140%, 180%',
           backgroundPosition: '130px -8px, top',
           backgroundRepeat: 'no-repeat',
           textShadow: '0 1px 6px rgb(38 59 82 / 18%)',
-          aspectRatio: '1.5',
+          aspectRatio: '1.765',
+        }} href="/docs/docs-theme/page-configuration">
+          <h3>Organize pages intuitively, <br/>with file-system routing from Next.js.</h3>
+        </Feature>
+        <Feature index={8} id="a11y-card" className='card-with-border' style={{
+          backgroundSize: 750,
+          backgroundRepeat: 'no-repeat',
+          minHeight: 288
         }}>
-          <h3 style={{ width: 300 }}>Organize pages intuitively, <br/>with file-system routing from Next.js.</h3>
+          <h3>A11y as a top priority.</h3>
+          <p>Nextra respects system options <br className="show-on-mobile"/>such as <b>Increase Contrast</b> and <b>Reduce Motion</b>.</p>
         </Feature>
-        <Feature>
-          <div/>
-          <h3>Links and images are always <span style={{ fontWeight: 300 }}>optimized</span>.</h3>
-          <p>Nextra converts Markdown links and images to [next/link](https://nextjs.org/docs/routing/introduction#linking-between-pages) and [next/image](https://nextjs.org/docs/basic-features/image-optimization#local-images), keeping your website the best experience.</p>
-          <div className={styles.optimization}>
-            <div style={{ fontSize: '.9rem', lineHeight: 2 }}>
-              <span>{`[Learn more](/more)`}</span>
-              <br/>
-              <span>{`![Hero](../public/hero.png)`}</span>
-            </div>
-          </div>
-          <div className={styles.optimization}>
-            <div style={{ fontSize: '.9rem', lineHeight: 2 }}>
-              <span>{`<Link .../>`}</span>
-              <br/>
-              <span>{`<Image .../>`}</span>
-            </div>
-          </div>
-        </Feature>
-        <Feature>
+        <Feature index={9} href="/docs/guide/ssg">
           <h3>Hybrid rendering, <br/>next generation.</h3>
-          <p>With Nextra, you can leverage the hybrid rendering power from Next.js with your Markdown content including [SSG](https://nextjs.org/docs/basic-features/pages#static-generation-recommended), [SSR](https://nextjs.org/docs/basic-features/pages#server-side-rendering), and [ISR](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration).</p>
+          <p className='mr-6'>You can leverage the hybrid rendering power from Next.js with your Markdown content including [SSG](https://nextjs.org/docs/basic-features/pages#static-generation-recommended), [SSR](https://nextjs.org/docs/basic-features/pages#server-side-rendering), and [ISR](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration).</p>
         </Feature>
-        <Feature large>
+        <Feature index={10} large>
           <h3>And more...</h3>
+          <p>SEO / RTL Layout / Pluggable Themes / Built-in Components / Last Git Edit Time / Multi-Docs...<br/>A lot of new possibilities to be explored.</p>
+          <p className="subtitle"><Link className="!no-underline" href="/docs">Start using Nextra →</Link></p>
         </Feature>
       </Features>
     </div>
-  </div>
-
-  <div className="content-container" style={{ marginTop: '4rem', marginBottom: '4rem' }}>
-    <p className="subtitle"><Link href="/docs"><a>Documentation →</a></Link></p>
   </div>
 </div>

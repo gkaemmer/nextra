@@ -106,7 +106,11 @@ NOTE: Original README.md below this line.
 
 # Nextra
 
-Nextra is a Next.js plugin that renders your **MDX files** with custom themes.
+Simple, powerful and flexible site generation framework with everything you love from Next.js.
+
+## Documentation
+
+[https://nextra.site](https://nextra.site)
 
 ## Development
 
@@ -121,7 +125,7 @@ cd packages/nextra
 pnpm build
 ```
 
-Watch mode: `yarn dev`
+Watch mode: `pnpm dev`
 
 ### Build Nextra Theme
 
@@ -130,9 +134,11 @@ cd packages/nextra-theme-docs
 pnpm build
 ```
 
-Watch mode: `pnpm dev`
-Watch mode (layout only): `pnpm dev:layout`
-Watch mode (style only): `pnpm dev:tailwind`
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| pnpm dev          | Watch mode               |
+| pnpm dev:layout   | Watch mode (layout only) |
+| pnpm dev:tailwind | Watch mode (style only)  |
 
 ### Development
 

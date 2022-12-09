@@ -113,7 +113,7 @@ const config: DocsThemeConfig = {
         <a
           rel="noopener"
           target="_blank"
-          className="flex items-center font-semibold gap-2"
+          className="flex items-center gap-2 font-semibold"
           href={FOOTER_LINK[locale]}
         >
           {FOOTER_LINK_TEXT[locale]}
@@ -183,7 +183,7 @@ const config: DocsThemeConfig = {
       <>
         <Logo className="h-3" />
         <span
-          className="ltr:ml-2 rtl:mr-2 font-extrabold hidden md:inline select-none"
+          className="hidden select-none font-extrabold ltr:ml-2 rtl:mr-2 md:inline"
           title={"SWR: " + (TITLE[locale] || "")}
         >
           SWR
@@ -198,7 +198,6 @@ const config: DocsThemeConfig = {
     link: "https://github.com/vercel/swr",
   },
   sidebar: {
-    defaultMenuCollapsed: true,
     titleComponent: ({ title, type }) =>
       type === "separator" ? (
         <div className="flex items-center gap-2">
@@ -209,13 +208,17 @@ const config: DocsThemeConfig = {
         <>{title}</>
       ),
   },
-  titleSuffix() {
-    const { locale } = useRouter();
-    return ` – SWR (${locale})`;
-  },
   toc: {
-    extraContent: <img src="https://placekitten.com/g/300/200" />,
+    extraContent: (
+      <img alt="placeholder cat" src="https://placekitten.com/g/300/200" />
+    ),
     float: true,
+  },
+  useNextSeoProps() {
+    const { locale } = useRouter();
+    return {
+      titleTemplate: `%s | SWR (${locale})`,
+    };
   },
 };
 

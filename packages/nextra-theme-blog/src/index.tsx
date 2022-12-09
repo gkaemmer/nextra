@@ -24,7 +24,7 @@ const BlogLayout = ({
   const Layout = layoutMap[type]
   if (!Layout) {
     throw new Error(
-      `Nextra-themes-blog does not support the layout type "${type}" It only supports "post", "page", "posts" and "tag"`
+      `nextra-theme-blog does not support the layout type "${type}" It only supports "post", "page", "posts" and "tag"`
     )
   }
   return (
@@ -52,4 +52,5 @@ export default function Layout(props: any) {
 
 export { useTheme } from 'next-themes'
 export { useBlogContext } from './blog-context'
+export { getStaticTags } from './utils/get-tags'
 export * from './types'
