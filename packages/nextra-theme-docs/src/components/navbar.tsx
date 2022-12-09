@@ -176,12 +176,6 @@ export function Navbar({ flatDirectories, items }: NavBarProps): ReactElement {
           className: 'nx-hidden md:nx-inline-block mx-min-w-[200px]'
         })}
 
-        {/* BEGIN OSO-SPECIFIC CODE */}
-        {config.customHeaderLinks
-          ? renderComponent(config.customHeaderLinks, {})
-          : null}
-        {/* END OSO-SPECIFIC CODE */}
-
         {config.project.link ? (
           <Anchor
             className="nx-p-2 nx-text-current"

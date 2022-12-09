@@ -109,10 +109,6 @@ export interface DocsThemeConfig {
     title: ReactNode | FC
   }
   useNextSeoProps?: () => NextSeoProps
-  // BEGIN OSO-SPECIFIC CODE
-  customHeaderLinks?: React.ReactNode | React.FC<{}>
-  noBreadcrumbs?: boolean
-  // END OSO-SPECIFIC CODE
 }
 
 export type PageTheme = {
