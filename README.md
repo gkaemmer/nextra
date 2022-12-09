@@ -3,7 +3,7 @@
 This fork slightly customizes the `nextra-theme-docs` theme to enable custom
 features for Oso's docs site.
 
-This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/core):
+This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/main):
 
 - It adds the ability to have "sidebar sections" by including an `isSection` option in `_meta.json`:
   ```js
@@ -15,10 +15,6 @@ This fork makes only tiny changes to [the `nextra` origin](https://github.com/sh
   // ...
   ```
   <img width="200" alt="Sidebar sections enabled by this fork" src="sidebarSections.png" />
-- It adds the ability to insert custom header content (which we use for inserting links):
-  <img width="300" alt="Header links enabled by this fork" src="headerLinks.png" />
-
-**Note**: the custom header content change will no longer be needed once this upstream PR lands (it does the same thing): https://github.com/shuding/nextra/pull/907
 
 **Ideally in the future Nextra is suitably customizable that we don't need this
 repo at all. We should try to make as few changes as possible to make merging
@@ -73,10 +69,10 @@ If you haven't already, add the upstream origin:
 git remote add upstream git@github.com:shuding/nextra.git
 ```
 
-Fetch and merge the `core` branch:
+Fetch and merge the `main` branch:
 ```
-git fetch upstream core
-git merge upstream/core
+git fetch upstream main
+git merge upstream/main
 ```
 
 **Note**: Merging is probably preferable to rebasing -- you'll have a bad time re-applying all the commits.
