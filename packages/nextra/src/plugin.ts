@@ -10,16 +10,15 @@ import {
 } from './types'
 import fs from 'graceful-fs'
 import { promisify } from 'node:util'
-import { parseFileName, parseJsonFile, truthy } from './utils'
+import { parseFileName, parseJsonFile, sortPages, truthy } from './utils'
 import path from 'node:path'
 import slash from 'slash'
 import grayMatter from 'gray-matter'
 import { Compiler } from 'webpack'
-import title from 'title'
-import { findPagesDir } from 'next/dist/lib/find-pages-dir.js'
 
 import { restoreCache } from './content-dump'
 import { CWD, MARKDOWN_EXTENSION_REGEX, META_FILENAME } from './constants'
+import { findPagesDirectory } from './file-system'
 
 const readdir = promisify(fs.readdir)
 const readFile = promisify(fs.readFile)
@@ -98,23 +97,24 @@ export async function collectFiles(
   const items = (await Promise.all(promises)).filter(truthy)
 
   const mdxPages = items.filter(
-    (item): item is MdxFile => item.kind === 'MdxPage'
+    (item): item is MdxFile | Folder =>
+      item.kind === 'MdxPage' || item.kind === 'Folder'
   )
-  const locales = mdxPages.map(item => item.locale)
+  const locales = mdxPages
+    .filter((item): item is MdxFile => item.kind === 'MdxPage')
+    .map(item => item.locale)
 
   for (const locale of locales) {
     const metaIndex = items.findIndex(
       item => item.kind === 'Meta' && item.locale === locale
     )
-    const defaultMeta: [string, string][] = mdxPages
-      .filter(item => item.locale === locale)
-      .map(item => [
-        item.name,
-        item.frontMatter?.title || title(item.name.replace(/[-_]/g, ' '))
-      ])
+
+    const defaultMeta = sortPages(mdxPages, locale)
+
     const metaFilename = locale
       ? META_FILENAME.replace('.', `.${locale}.`)
       : META_FILENAME
+
     const metaPath = path.join(dir, metaFilename) as MetaJsonPath
 
     if (metaIndex === -1) {
@@ -169,11 +169,11 @@ export class NextraPlugin {
     compiler.hooks.beforeCompile.tapAsync(
       'NextraPlugin',
       async (_, callback) => {
-        if (this.config?.unstable_flexsearch) {
+        if (this.config?.flexsearch) {
           // Restore the search data from the cache.
           restoreCache()
         }
-        const PAGES_DIR = findPagesDir(CWD).pages as string
+        const PAGES_DIR = findPagesDirectory()
         const result = await collectFiles(PAGES_DIR)
         pageMapCache.set(result)
         callback()

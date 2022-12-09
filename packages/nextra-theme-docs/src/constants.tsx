@@ -14,19 +14,17 @@ export const IS_BROWSER = typeof window !== 'undefined'
 
 export const DEFAULT_THEME: DocsThemeConfig = {
   banner: {
-    key: 'nextra-banner',
-    text: ''
+    dismissible: true,
+    key: 'nextra-banner'
   },
   chat: {
     icon: (
       <>
         <DiscordIcon />
-        <span className="sr-only">Discord</span>
+        <span className="nx-sr-only">Discord</span>
       </>
-    ),
-    link: ''
+    )
   },
-  components: {},
   darkMode: true,
   direction: 'ltr',
   docsRepositoryBase: 'https://github.com/shuding/nextra',
@@ -44,10 +42,9 @@ export const DEFAULT_THEME: DocsThemeConfig = {
     },
     text: 'Edit this page'
   },
-  faviconGlyph: '',
   feedback: {
-    content: null,
-    labels: ''
+    content: () => <>Question? Give us feedback →</>,
+    labels: 'feedback'
   },
   footer: {
     component: Footer,
@@ -81,20 +78,17 @@ export const DEFAULT_THEME: DocsThemeConfig = {
   i18n: [],
   logo: (
     <>
-      <span className="mr-2 hidden font-extrabold md:inline">Nextra</span>
-      <span className="hidden font-normal text-gray-600 md:inline">
+      <span className="nx-font-extrabold">Nextra</span>
+      <span className="nx-ml-2 nx-hidden nx-font-normal nx-text-gray-600 md:nx-inline">
         The Next Docs Builder
       </span>
     </>
   ),
-  main: {
-    extraContent: null
+  logoLink: true,
+  navbar: {
+    component: Navbar
   },
-  navbar: Navbar,
-  navigation: {
-    next: true,
-    prev: true
-  },
+  navigation: true,
   nextThemes: {
     defaultTheme: 'system',
     storageKey: 'theme'
@@ -111,30 +105,37 @@ export const DEFAULT_THEME: DocsThemeConfig = {
     icon: (
       <>
         <GitHubIcon />
-        <span className="sr-only">GitHub</span>
+        <span className="nx-sr-only">GitHub</span>
       </>
-    ),
-    // by default should be empty so clicking on project link will go to the github link
-    link: ''
+    )
   },
   search: {
     component({ className, directories }) {
       const config = useConfig()
-      return config.unstable_flexsearch ? (
+      return config.flexsearch ? (
         <Flexsearch className={className} />
       ) : (
         <MatchSorterSearch className={className} directories={directories} />
       )
     },
     emptyResult: (
-      <span className="block select-none p-8 text-center text-sm text-gray-400">
+      <span className="nx-block nx-select-none nx-p-8 nx-text-center nx-text-sm nx-text-gray-400">
         No results found.
       </span>
     ),
+    loading() {
+      const { locale } = useRouter()
+      if (locale === 'zh-CN') return '正在加载…'
+      if (locale === 'ru') return 'Загрузка…'
+      if (locale === 'fr') return 'Сhargement…'
+      return 'Loading…'
+    },
     placeholder() {
       const { locale } = useRouter()
-      if (locale === 'zh-CN') return '搜索文档...'
-      return 'Search documentation...'
+      if (locale === 'zh-CN') return '搜索文档…'
+      if (locale === 'ru') return 'Поиск документации…'
+      if (locale === 'fr') return 'Rechercher de la documentation…'
+      return 'Search documentation…'
     }
   },
   serverSideError: {
@@ -142,16 +143,15 @@ export const DEFAULT_THEME: DocsThemeConfig = {
     labels: 'bug'
   },
   sidebar: {
-    defaultMenuCollapsed: false,
+    defaultMenuCollapseLevel: 2,
     titleComponent: ({ title }) => <>{title}</>
   },
-  titleSuffix: ' – Nextra',
   toc: {
     component: TOC,
-    extraContent: null,
     float: true,
     title: 'On This Page'
-  }
+  },
+  useNextSeoProps: () => ({ titleTemplate: '%s – Nextra' })
 }
 
 export const DEEP_OBJECT_KEYS = Object.entries(DEFAULT_THEME)
@@ -169,9 +169,9 @@ export const DEEP_OBJECT_KEYS = Object.entries(DEFAULT_THEME)
 
 export const LEGACY_CONFIG_OPTIONS: Record<string, string> = {
   bannerKey: 'banner.key',
-  bodyExtraContent: 'main.extraContent',
+  bodyExtraContent: 'main',
   customSearch: 'search.component',
-  defaultMenuCollapsed: 'sidebar.defaultMenuCollapsed',
+  defaultMenuCollapsed: 'sidebar.defaultMenuCollapseLevel',
   feedbackLabels: 'feedback.labels',
   feedbackLink: 'feedback.content',
   floatTOC: 'toc.float',
@@ -197,6 +197,7 @@ export const LEGACY_CONFIG_OPTIONS: Record<string, string> = {
 
 export const DEFAULT_PAGE_THEME: PageTheme = {
   breadcrumb: true,
+  collapsed: false,
   footer: true,
   layout: 'default',
   navbar: true,

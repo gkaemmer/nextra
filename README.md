@@ -3,7 +3,7 @@
 This fork slightly customizes the `nextra-theme-docs` theme to enable custom
 features for Oso's docs site.
 
-This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/core):
+This fork makes only tiny changes to [the `nextra` origin](https://github.com/shuding/nextra/tree/main):
 
 - It adds the ability to have "sidebar sections" by including an `isSection` option in `_meta.json`:
   ```js
@@ -15,10 +15,6 @@ This fork makes only tiny changes to [the `nextra` origin](https://github.com/sh
   // ...
   ```
   <img width="200" alt="Sidebar sections enabled by this fork" src="sidebarSections.png" />
-- It adds the ability to insert custom header content (which we use for inserting links):
-  <img width="300" alt="Header links enabled by this fork" src="headerLinks.png" />
-
-**Note**: the custom header content change will no longer be needed once this upstream PR lands (it does the same thing): https://github.com/shuding/nextra/pull/907
 
 **Ideally in the future Nextra is suitably customizable that we don't need this
 repo at all. We should try to make as few changes as possible to make merging
@@ -55,6 +51,11 @@ npm run local-theme
 Then, you should be able to make changes to `packages/nextra-theme-docs` and see
 those changes reflected in the Oso Cloud Docs.
 
+Note that if upstream Nextra has added new dependencies, you will probably get an error
+about a missing import on this step. `local-deps` doesn't pull in `nextra-theme-docs-oso`'s
+dependencies, for some reason. The workaround is to add the missing dependencies directly to
+`oso-service/docs/package.json` while you're developing. (You won't need to commit those changes.)
+
 ## Publishing
 
 When it comes time to publish your changes to `nextra-theme-docs-oso`, just run
@@ -73,10 +74,10 @@ If you haven't already, add the upstream origin:
 git remote add upstream git@github.com:shuding/nextra.git
 ```
 
-Fetch and merge the `core` branch:
+Fetch and merge the `main` branch:
 ```
-git fetch upstream core
-git merge upstream/core
+git fetch upstream main
+git merge upstream/main
 ```
 
 **Note**: Merging is probably preferable to rebasing -- you'll have a bad time re-applying all the commits.
@@ -106,7 +107,11 @@ NOTE: Original README.md below this line.
 
 # Nextra
 
-Nextra is a Next.js plugin that renders your **MDX files** with custom themes.
+Simple, powerful and flexible site generation framework with everything you love from Next.js.
+
+## Documentation
+
+[https://nextra.site](https://nextra.site)
 
 ## Development
 
@@ -121,7 +126,7 @@ cd packages/nextra
 pnpm build
 ```
 
-Watch mode: `yarn dev`
+Watch mode: `pnpm dev`
 
 ### Build Nextra Theme
 
@@ -130,9 +135,11 @@ cd packages/nextra-theme-docs
 pnpm build
 ```
 
-Watch mode: `pnpm dev`
-Watch mode (layout only): `pnpm dev:layout`
-Watch mode (style only): `pnpm dev:tailwind`
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| pnpm dev          | Watch mode               |
+| pnpm dev:layout   | Watch mode (layout only) |
+| pnpm dev:tailwind | Watch mode (style only)  |
 
 ### Development
 

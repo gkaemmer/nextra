@@ -1,11 +1,11 @@
 const withNextra = require("nextra")({
   theme: "nextra-theme-docs",
   themeConfig: "./theme.config.tsx",
-  unstable_flexsearch: {
+  flexsearch: {
     codeblocks: true,
   },
-  unstable_staticImage: true,
-  unstable_defaultShowCopyCode: true
+  staticImage: true,
+  defaultShowCopyCode: true
 });
 
 module.exports = withNextra({
@@ -63,7 +63,4 @@ module.exports = withNextra({
     ];
   },
   reactStrictMode: true,
-  experimental: {
-    newNextLinkBehavior: true,
-  },
 });
