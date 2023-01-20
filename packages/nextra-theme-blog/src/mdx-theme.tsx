@@ -32,7 +32,6 @@ const H1 = ({ children }: { children?: ReactNode }): ReactElement => {
   return <>{showHeading && createPortal(children, ref.current!)}</>
 }
 
-<<<<<<< HEAD
 function HeadingLink({
   tag: Tag,
   children,
@@ -100,3 +99,4 @@ export const MDXTheme = ({
 }): ReactElement => {
   return <MDXProvider components={useComponents()}>{children}</MDXProvider>
 }
+

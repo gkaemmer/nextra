@@ -246,6 +246,9 @@ export class NextraPlugin {
           const result = await collectFiles(PAGES_DIR, locales)
           pageMapCache.set(result)
           callback()
+        } catch (err) {
+          callback(err as Error)
+        }
       }
     )
   }
