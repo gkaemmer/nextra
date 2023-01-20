@@ -2,46 +2,16 @@
 
 exports[`process heading > code-h1 1`] = `
 {
+  "frontMatter": {},
   "headings": [
     {
-      "children": [
-        {
-          "position": {
-            "end": {
-              "column": 16,
-              "line": 1,
-              "offset": 15,
-            },
-            "start": {
-              "column": 3,
-              "line": 1,
-              "offset": 2,
-            },
-          },
-          "type": "inlineCode",
-          "value": "codegen.yml",
-        },
-      ],
       "depth": 1,
-      "position": {
-        "end": {
-          "column": 16,
-          "line": 1,
-          "offset": 15,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "heading",
+      "id": "codegenyml",
       "value": "codegen.yml",
     },
   ],
   "result": "/*@jsxRuntime automatic @jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from \\"@mdx-js/react\\";
-const __nextra_title__ = \\"codegen.yml\\";
+import {useMDXComponents as _provideComponents} from \\"nextra/mdx\\";
 function _createMdxContent(props) {
   const _components = Object.assign({
     h1: \\"h1\\",
@@ -55,68 +25,24 @@ function MDXContent(props = {}) {
 }
 
 ",
+  "searchIndexKey": null,
   "structurizedData": {},
+  "title": "codegen.yml",
 }
 `;
 
 exports[`process heading > code-with-text-h1 1`] = `
 {
+  "frontMatter": {},
   "headings": [
     {
-      "children": [
-        {
-          "position": {
-            "end": {
-              "column": 16,
-              "line": 1,
-              "offset": 15,
-            },
-            "start": {
-              "column": 3,
-              "line": 1,
-              "offset": 2,
-            },
-          },
-          "type": "inlineCode",
-          "value": "codegen.yml",
-        },
-        {
-          "position": {
-            "end": {
-              "column": 21,
-              "line": 1,
-              "offset": 20,
-            },
-            "start": {
-              "column": 16,
-              "line": 1,
-              "offset": 15,
-            },
-          },
-          "type": "text",
-          "value": " file",
-        },
-      ],
       "depth": 1,
-      "position": {
-        "end": {
-          "column": 21,
-          "line": 1,
-          "offset": 20,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "heading",
+      "id": "codegenyml-file",
       "value": "codegen.yml file",
     },
   ],
   "result": "/*@jsxRuntime automatic @jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from \\"@mdx-js/react\\";
-const __nextra_title__ = \\"codegen.yml file\\";
+import {useMDXComponents as _provideComponents} from \\"nextra/mdx\\";
 function _createMdxContent(props) {
   const _components = Object.assign({
     h1: \\"h1\\",
@@ -130,90 +56,25 @@ function MDXContent(props = {}) {
 }
 
 ",
+  "searchIndexKey": null,
   "structurizedData": {},
+  "title": "codegen.yml file",
 }
 `;
 
 exports[`process heading > dynamic-h1 1`] = `
 {
+  "frontMatter": {},
   "hasJsxInH1": true,
   "headings": [
     {
-      "children": [
-        {
-          "position": {
-            "end": {
-              "column": 22,
-              "line": 8,
-              "offset": 153,
-            },
-            "start": {
-              "column": 3,
-              "line": 8,
-              "offset": 134,
-            },
-          },
-          "type": "text",
-          "value": "Posts Tagged with “",
-        },
-        {
-          "attributes": [],
-          "children": [],
-          "data": {
-            "_mdxExplicitJsx": true,
-          },
-          "name": "TagName",
-          "position": {
-            "end": {
-              "column": 32,
-              "line": 8,
-              "offset": 163,
-            },
-            "start": {
-              "column": 22,
-              "line": 8,
-              "offset": 153,
-            },
-          },
-          "type": "mdxJsxTextElement",
-        },
-        {
-          "position": {
-            "end": {
-              "column": 33,
-              "line": 8,
-              "offset": 164,
-            },
-            "start": {
-              "column": 32,
-              "line": 8,
-              "offset": 163,
-            },
-          },
-          "type": "text",
-          "value": "”",
-        },
-      ],
       "depth": 1,
-      "position": {
-        "end": {
-          "column": 33,
-          "line": 8,
-          "offset": 164,
-        },
-        "start": {
-          "column": 1,
-          "line": 8,
-          "offset": 132,
-        },
-      },
-      "type": "heading",
+      "id": "posts-tagged-with-",
       "value": "Posts Tagged with “”",
     },
   ],
   "result": "/*@jsxRuntime automatic @jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from \\"@mdx-js/react\\";
-const __nextra_title__ = \\"Posts Tagged with “”\\";
+import {useMDXComponents as _provideComponents} from \\"nextra/mdx\\";
 import {useRouter} from 'next/router';
 export const TagName = () => {
   const {tag} = useRouter().query;
@@ -231,51 +92,24 @@ function MDXContent(props = {}) {
 }
 
 ",
+  "searchIndexKey": null,
   "structurizedData": {},
+  "title": "Posts Tagged with “”",
 }
 `;
 
 exports[`process heading > no-h1 1`] = `
 {
+  "frontMatter": {},
   "headings": [
     {
-      "children": [
-        {
-          "position": {
-            "end": {
-              "column": 6,
-              "line": 1,
-              "offset": 5,
-            },
-            "start": {
-              "column": 4,
-              "line": 1,
-              "offset": 3,
-            },
-          },
-          "type": "text",
-          "value": "H2",
-        },
-      ],
       "depth": 2,
-      "position": {
-        "end": {
-          "column": 6,
-          "line": 1,
-          "offset": 5,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "heading",
+      "id": "h2",
       "value": "H2",
     },
   ],
   "result": "/*@jsxRuntime automatic @jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from \\"@mdx-js/react\\";
+import {useMDXComponents as _provideComponents} from \\"nextra/mdx\\";
 function _createMdxContent(props) {
   const _components = Object.assign({
     h2: \\"h2\\"
@@ -288,52 +122,23 @@ function MDXContent(props = {}) {
 }
 
 ",
+  "searchIndexKey": null,
   "structurizedData": {},
 }
 `;
 
 exports[`process heading > static-h1 1`] = `
 {
+  "frontMatter": {},
   "headings": [
     {
-      "children": [
-        {
-          "position": {
-            "end": {
-              "column": 14,
-              "line": 1,
-              "offset": 13,
-            },
-            "start": {
-              "column": 3,
-              "line": 1,
-              "offset": 2,
-            },
-          },
-          "type": "text",
-          "value": "Hello World",
-        },
-      ],
       "depth": 1,
-      "position": {
-        "end": {
-          "column": 14,
-          "line": 1,
-          "offset": 13,
-        },
-        "start": {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "heading",
+      "id": "hello-world",
       "value": "Hello World",
     },
   ],
   "result": "/*@jsxRuntime automatic @jsxImportSource react*/
-import {useMDXComponents as _provideComponents} from \\"@mdx-js/react\\";
-const __nextra_title__ = \\"Hello World\\";
+import {useMDXComponents as _provideComponents} from \\"nextra/mdx\\";
 function _createMdxContent(props) {
   const _components = Object.assign({
     h1: \\"h1\\"
@@ -346,6 +151,8 @@ function MDXContent(props = {}) {
 }
 
 ",
+  "searchIndexKey": null,
   "structurizedData": {},
+  "title": "Hello World",
 }
 `;

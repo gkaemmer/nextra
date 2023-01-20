@@ -1,5 +1,5 @@
 {
-  "name": "blog",
+  "name": "example-blog",
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -25,5 +25,6 @@
     "nextra-theme-blog": {
       "injected": true
     }
-  }
+  },
+  "version": null
 }

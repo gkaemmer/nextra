@@ -1,7 +1,7 @@
 const TAILWIND_CONFIG = {
   extends: ['plugin:tailwindcss/recommended'],
   rules: {
-    'tailwindcss/classnames-order': 'error',
+    'tailwindcss/classnames-order': 'off', // conflicts with prettier-plugin-tailwindcss
     'tailwindcss/enforces-negative-arbitrary-values': 'error',
     'tailwindcss/enforces-shorthand': 'error',
     'tailwindcss/migration-from-tailwind-2': 'error',
@@ -9,20 +9,98 @@ const TAILWIND_CONFIG = {
   }
 }
 
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
   reportUnusedDisableDirectives: true,
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 'latest'
-  },
+  ignorePatterns: ['next-env.d.ts'],
   overrides: [
+    // Rules for all files
     {
-      // TODO: enable for `nextra-theme-blog` also
-      files: 'packages/nextra-theme-docs/**/*',
-      plugins: ['typescript-sort-keys'],
+      files: '**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts}',
+      extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
       rules: {
+        'prefer-object-has-own': 'error',
+        'logical-assignment-operators': [
+          'error',
+          'always',
+          { enforceForIfStatements: true }
+        ],
+        '@typescript-eslint/prefer-optional-chain': 'error',
+        'no-else-return': ['error', { allowElseIf: false }],
+        'no-lonely-if': 'error',
+        // todo: enable
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off'
+      }
+    },
+    // Rules for React files
+    {
+      files: '{packages,examples,docs}/**',
+      extends: [
+        'plugin:react/recommended',
+        'plugin:react/jsx-runtime',
+        'plugin:react-hooks/recommended',
+        'plugin:@next/next/recommended'
+      ],
+      rules: {
+        'react/prop-types': 'off',
+        'react/no-unknown-property': ['error', { ignore: ['jsx'] }],
+        'react-hooks/exhaustive-deps': 'error',
+        'react/self-closing-comp': 'error',
+        'no-restricted-syntax': [
+          'error',
+          {
+            // ❌ useMemo(…, [])
+            selector:
+              'CallExpression[callee.name=useMemo][arguments.1.type=ArrayExpression][arguments.1.elements.length=0]',
+            message:
+              "`useMemo` with an empty dependency array can't provide a stable reference, use `useRef` instead."
+          }
+        ],
+        'react/jsx-filename-extension': [
+          'error',
+          { extensions: ['.tsx', '.jsx'], allow: 'as-needed' }
+        ],
+        'react/jsx-curly-brace-presence': 'error',
+        'react/jsx-boolean-value': 'error'
+      },
+      settings: {
+        react: { version: 'detect' }
+      }
+    },
+    // Rules for TypeScript files
+    {
+      files: '**/*.{ts,tsx,cts,mts}',
+      extends: [
+        // TODO: fix errors
+        // 'plugin:@typescript-eslint/recommended-requiring-type-checking'
+      ],
+      parserOptions: {
+        project: [
+          'packages/*/tsconfig.json',
+          'docs/tsconfig.json',
+          'tsconfig.eslint.json'
+        ]
+      },
+      rules: {
+        '@typescript-eslint/no-unnecessary-type-assertion': 'error'
+      }
+    },
+    // ⚙️ nextra-theme-docs
+    {
+      ...TAILWIND_CONFIG,
+      files: 'packages/nextra-theme-docs/**',
+      plugins: ['typescript-sort-keys'],
+      settings: {
+        tailwindcss: {
+          config: 'packages/nextra-theme-docs/tailwind.config.js',
+          callees: ['cn'],
+          whitelist: ['nextra-breadcrumb', 'nextra-callout', 'nextra-bleed']
+        }
+      },
+      rules: {
+        ...TAILWIND_CONFIG.rules,
         'no-restricted-imports': [
           'error',
           {
@@ -32,8 +110,87 @@ module.exports = {
         ]
       }
     },
+    // ⚙️ nextra-theme-blog
     {
-      files: 'packages/nextra/src/**/*',
+      ...TAILWIND_CONFIG,
+      files: 'packages/nextra-theme-blog/**',
+      settings: {
+        tailwindcss: {
+          config: 'packages/nextra-theme-blog/tailwind.config.js',
+          whitelist: ['subheading-', 'post-item', 'post-item-more']
+        }
+      }
+    },
+    // ⚙️ nextra
+    {
+      ...TAILWIND_CONFIG,
+      files: 'packages/nextra/**',
+      settings: {
+        tailwindcss: {
+          config: 'packages/nextra-theme-docs/tailwind.config.js',
+          whitelist: ['nextra-code-block']
+        }
+      }
+    },
+    // ⚙️ Docs
+    {
+      ...TAILWIND_CONFIG,
+      files: 'docs/**',
+      settings: {
+        tailwindcss: {
+          config: 'docs/tailwind.config.js',
+          callees: ['cn'],
+          whitelist: ['dash-ring', 'theme-1', 'theme-2', 'theme-3', 'theme-4']
+        },
+        next: { rootDir: 'docs' }
+      }
+    },
+    // ⚙️ SWR-site example
+    {
+      ...TAILWIND_CONFIG,
+      files: 'examples/swr-site/**',
+      settings: {
+        tailwindcss: {
+          config: 'examples/swr-site/tailwind.config.js'
+        },
+        next: { rootDir: 'examples/swr-site' }
+      }
+    },
+    // ⚙️ blog example
+    {
+      files: 'examples/blog/**',
+      settings: {
+        next: { rootDir: 'examples/blog' }
+      }
+    },
+    // ⚙️ docs example
+    {
+      files: 'examples/docs/**',
+      settings: {
+        next: { rootDir: 'examples/docs' }
+      }
+    },
+    {
+      files: [
+        'prettier.config.js',
+        'postcss.config.js',
+        'tailwind.config.js',
+        'next.config.js',
+        '.eslintrc.cjs'
+      ],
+      env: {
+        node: true
+      }
+    },
+    {
+      files: 'packages/{nextra,nextra-theme-docs,nextra-theme-blog}/**',
+      rules: {
+        // disable rule because we don't have pagesDir in above folders
+        '@next/next/no-html-link-for-pages': 'off'
+      }
+    },
+    {
+      files: 'packages/nextra/src/**',
       rules: {
         'no-restricted-imports': [
           'error',
@@ -49,53 +206,9 @@ module.exports = {
       }
     },
     {
-      ...TAILWIND_CONFIG,
-      files: 'packages/nextra-theme-docs/**/*',
-      settings: {
-        tailwindcss: {
-          config: 'packages/nextra-theme-docs/tailwind.config.js',
-          callees: ['cn'],
-          whitelist: ['nextra-breadcrumb', 'nextra-callout', 'nextra-bleed']
-        }
-      }
-    },
-    {
-      ...TAILWIND_CONFIG,
-      files: 'packages/nextra-theme-blog/**/*',
-      settings: {
-        tailwindcss: {
-          config: 'packages/nextra-theme-blog/tailwind.config.js',
-          whitelist: ['subheading-', 'post-item', 'post-item-more']
-        }
-      }
-    },
-    {
-      ...TAILWIND_CONFIG,
-      files: 'packages/nextra/**/*',
-      settings: {
-        tailwindcss: {
-          config: 'packages/nextra-theme-docs/tailwind.config.js'
-        }
-      }
-    },
-    {
-      ...TAILWIND_CONFIG,
-      files: 'examples/swr-site/**/*',
-      settings: {
-        tailwindcss: {
-          config: 'examples/swr-site/tailwind.config.js'
-        }
-      }
-    },
-    {
-      ...TAILWIND_CONFIG,
-      files: 'docs/**/*',
-      settings: {
-        tailwindcss: {
-          config: 'docs/tailwind.config.js',
-          callees: ['cn'],
-          whitelist: ['dash-ring', 'theme-1', 'theme-2', 'theme-3', 'theme-4']
-        }
+      files: ['**/*.d.ts'],
+      rules: {
+        'no-var': 'off'
       }
     }
   ]

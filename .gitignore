@@ -14,3 +14,5 @@ packages/nextra-theme-*/style.css
 
 .vercel
 .idea/
+.eslintcache
+.env

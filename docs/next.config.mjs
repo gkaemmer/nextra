@@ -4,6 +4,7 @@ const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   staticImage: true,
+  latex: true,
   flexsearch: {
     codeblocks: false
   },
@@ -11,5 +12,9 @@ const withNextra = nextra({
 })
 
 export default withNextra({
-  reactStrictMode: true
+  reactStrictMode: true,
+  eslint: {
+    // Eslint behaves weirdly in this monorepo.
+    ignoreDuringBuilds: true
+  }
 })
