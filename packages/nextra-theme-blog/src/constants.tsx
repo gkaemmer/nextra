@@ -1,4 +1,5 @@
 /* eslint sort-keys: error */
+import React from 'react'
 import { NextraBlogTheme } from './types'
 
 export const DEFAULT_THEME: NextraBlogTheme = {

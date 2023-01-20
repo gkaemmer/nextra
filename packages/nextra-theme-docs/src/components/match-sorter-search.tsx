@@ -1,4 +1,4 @@
-import { useMemo, useState, ReactElement } from 'react'
+import React, { useMemo, useState, ReactElement } from 'react'
 import { matchSorter } from 'match-sorter'
 import { Item as NormalItem } from '../utils'
 import { Search } from './search'
@@ -7,7 +7,7 @@ import { SearchResult } from '../types'
 
 export function MatchSorterSearch({
   className,
-  directories
+  directories = []
 }: {
   className?: string
   directories: NormalItem[]
@@ -27,7 +27,7 @@ export function MatchSorterSearch({
             })
           )
         : [],
-    [search, directories]
+    [search]
   )
 
   return (

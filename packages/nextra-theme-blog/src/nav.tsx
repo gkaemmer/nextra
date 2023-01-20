@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import React, { ReactElement } from 'react'
 import Link from 'next/link'
 import ThemeSwitch from './theme-switch'
 import { useBlogContext } from './blog-context'

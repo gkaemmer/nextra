@@ -1,18 +1,5 @@
 /* eslint sort-keys: error */
 export default {
-  components: {
-    h1: ({ children }) => (
-      <h1 style={{
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        backgroundImage: 'linear-gradient(90deg,#7928CA,#FF0080)',
-      }}
-      >
-        {children}
-      </h1>
-    )
-  },
   darkMode: true,
   footer: (
     <small style={{ display: 'block', marginTop: '8rem' }}>
@@ -22,13 +9,12 @@ export default {
       >
         CC BY-NC 4.0
       </abbr>{' '}
-      {new Date().getFullYear()} © Shu Ding.
+      <time>{new Date().getFullYear()}</time> © Shu Ding.
       <a href="/feed.xml">RSS</a>
       <style jsx>{`
         a {
           float: right;
         }
-
         @media screen and (max-width: 480px) {
           article {
             padding-top: 2rem;
@@ -37,5 +23,5 @@ export default {
         }
       `}</style>
     </small>
-  )
+  ),
 }

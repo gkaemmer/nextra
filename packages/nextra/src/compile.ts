@@ -2,9 +2,8 @@ import { createProcessor, ProcessorOptions } from '@mdx-js/mdx'
 import { Processor } from '@mdx-js/mdx/lib/core'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
+import { rehypeMdxTitle } from 'rehype-mdx-title'
 import readingTime from 'remark-reading-time'
-import grayMatter from 'gray-matter'
-
 import {
   remarkStaticImage,
   remarkHeadings,
@@ -15,16 +14,16 @@ import {
 import { LoaderOptions, PageOpts, ReadingTime } from './types'
 import theme from './theme.json'
 import { truthy } from './utils'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import { CODE_BLOCK_FILENAME_REGEX, DEFAULT_LOCALE } from './constants'
 
-globalThis.__nextra_temp_do_not_use = () => {
-  // @ts-expect-error -- ignore error - File is not a module
-  import('./__temp__')
+const createCompiler = (mdxOptions: ProcessorOptions): Processor => {
+  const compiler = createProcessor(mdxOptions)
+  compiler.data('headingMeta', {
+    headings: []
+  })
+  return compiler
 }
 
-const DEFAULT_REHYPE_PRETTY_CODE_OPTIONS = {
+const rehypePrettyCodeOptions = {
   theme,
   onVisitLine(node: any) {
     // Prevent lines from collapsing in `display: grid` mode, and
@@ -38,123 +37,62 @@ const DEFAULT_REHYPE_PRETTY_CODE_OPTIONS = {
   },
   onVisitHighlightedWord(node: any) {
     node.properties.className = ['highlighted']
-  },
-  filterMetaString: (meta: string) =>
-    meta.replace(CODE_BLOCK_FILENAME_REGEX, '')
+  }
 }
-
-const cachedCompilerForFormat: Record<
-  Exclude<ProcessorOptions['format'], undefined>,
-  Processor
-> = Object.create(null)
-
-type MdxOptions = LoaderOptions['mdxOptions'] &
-  Pick<ProcessorOptions, 'jsx' | 'outputFormat'>
 
 export async function compileMdx(
   source: string,
   loaderOptions: Pick<
     LoaderOptions,
-    | 'staticImage'
-    | 'flexsearch'
-    | 'defaultShowCopyCode'
-    | 'readingTime'
-    | 'latex'
-    | 'codeHighlight'
-  > & { mdxOptions?: MdxOptions; route?: string; locale?: string } = {},
-  filePath = '',
-  useCachedCompiler = false
+    'staticImage' | 'flexsearch' | 'defaultShowCopyCode' | 'readingTime'
+  > & {
+    mdxOptions?: LoaderOptions['mdxOptions'] &
+      Pick<ProcessorOptions, 'jsx' | 'outputFormat'>
+  } = {},
+  filePath = ''
 ) {
-  // Extract frontMatter information if it exists
-  const { data: frontMatter, content } = grayMatter(source)
-
   const structurizedData = Object.create(null)
 
-  let searchIndexKey: string | null = null
-  if (typeof loaderOptions.flexsearch === 'object') {
-    if (loaderOptions.flexsearch.indexKey) {
-      searchIndexKey = loaderOptions.flexsearch.indexKey(
-        filePath,
-        loaderOptions.route || '',
-        loaderOptions.locale
-      )
-      if (searchIndexKey === '') {
-        searchIndexKey = loaderOptions.locale || DEFAULT_LOCALE
-      }
-    } else {
-      searchIndexKey = loaderOptions.locale || DEFAULT_LOCALE
-    }
-  } else if (loaderOptions.flexsearch) {
-    searchIndexKey = loaderOptions.locale || DEFAULT_LOCALE
-  }
+  const mdxOptions = loaderOptions.mdxOptions || {}
 
-  const {
-    jsx = false,
-    format = 'mdx',
-    outputFormat = 'function-body',
-    remarkPlugins = [],
-    rehypePlugins = [],
-    rehypePrettyCodeOptions
-  }: MdxOptions = {
-    ...loaderOptions.mdxOptions,
-    // You can override MDX options in the frontMatter too.
-    ...(frontMatter.mdxOptions as Record<string, unknown>)
-  }
-
-  const compiler =
-    (useCachedCompiler && cachedCompilerForFormat[format]) ||
-    (cachedCompilerForFormat[format] = createProcessor({
-      jsx,
-      format,
-      outputFormat,
-      providerImportSource: 'nextra/mdx',
-      // https://github.com/hashicorp/next-mdx-remote/issues/307#issuecomment-1363415249
-      development: false,
-      remarkPlugins: [
-        ...remarkPlugins,
-        remarkGfm,
-        remarkHeadings,
-        loaderOptions.staticImage && remarkStaticImage,
-        searchIndexKey !== null &&
-          structurize(structurizedData, loaderOptions.flexsearch),
-        loaderOptions.readingTime && readingTime,
-        loaderOptions.latex && remarkMath
-      ].filter(truthy),
-      rehypePlugins: [
-        ...rehypePlugins,
-        [parseMeta, { defaultShowCopyCode: loaderOptions.defaultShowCopyCode }],
-        loaderOptions.codeHighlight &&
-          ([
-            rehypePrettyCode,
-            {
-              ...DEFAULT_REHYPE_PRETTY_CODE_OPTIONS,
-              ...rehypePrettyCodeOptions
-            }
-          ] as any),
-        attachMeta,
-        loaderOptions.latex && rehypeKatex
-      ].filter(truthy)
-    }))
-
+  const compiler = createCompiler({
+    jsx: mdxOptions.jsx || false,
+    outputFormat: mdxOptions.outputFormat || 'function-body',
+    providerImportSource: '@mdx-js/react',
+    remarkPlugins: [
+      ...(mdxOptions.remarkPlugins || []),
+      remarkGfm,
+      remarkHeadings,
+      loaderOptions.staticImage && ([remarkStaticImage, { filePath }] as any),
+      loaderOptions.flexsearch &&
+        structurize(structurizedData, loaderOptions.flexsearch),
+      loaderOptions.readingTime && readingTime
+    ].filter(truthy),
+    rehypePlugins: [
+      ...(mdxOptions.rehypePlugins || []),
+      parseMeta,
+      [
+        rehypePrettyCode,
+        { ...rehypePrettyCodeOptions, ...mdxOptions.rehypePrettyCodeOptions }
+      ],
+      [rehypeMdxTitle, { name: '__nextra_title__' }],
+      [attachMeta, { defaultShowCopyCode: loaderOptions.defaultShowCopyCode }]
+    ]
+  })
   try {
-    compiler.data('headingMeta', { headings: [] })
-    const vFile = await compiler.process(
-      filePath ? { value: content, path: filePath } : content
-    )
-
-    const headingMeta = compiler.data('headingMeta') as Pick<
-      PageOpts,
-      'headings' | 'hasJsxInH1' | 'title'
-    >
+    const vFile = await compiler.process(source)
+    const result = String(vFile)
+      .replace('export const __nextra_title__', 'const __nextra_title__')
+      .replace('export default MDXContent;', '')
     const readingTime = vFile.data.readingTime as ReadingTime | undefined
-
     return {
-      result: String(vFile).replace('export default MDXContent;', ''),
-      ...headingMeta,
+      result,
+      ...(compiler.data('headingMeta') as Pick<
+        PageOpts,
+        'headings' | 'hasJsxInH1'
+      >),
       ...(readingTime && { readingTime }),
-      structurizedData,
-      searchIndexKey,
-      frontMatter
+      structurizedData
     }
   } catch (err) {
     console.error(`[nextra] Error compiling ${filePath}.`)

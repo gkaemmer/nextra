@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { ComponentProps, ReactElement } from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 
-const SWRLogo = (props: ComponentProps<"svg">): ReactElement => (
+const Logo = (props: ComponentProps<"svg">): ReactElement => (
   <svg viewBox="0 0 291 69" fill="none" {...props}>
     <path
       d="M0 36.53c.07 17.6 14.4 32.01 32.01 32.01a32.05 32.05 0 0032.01-32V32a13.2 13.2 0 0123.4-8.31h20.7A32.07 32.07 0 0077.2 0a32.05 32.05 0 00-32 32.01v4.52A13.2 13.2 0 0132 49.71a13.2 13.2 0 01-13.18-13.18 3.77 3.77 0 00-3.77-3.77H3.76A3.77 3.77 0 000 36.53zM122.49 68.54a32.14 32.14 0 01-30.89-23.7h20.67a13.16 13.16 0 0023.4-8.3V32A32.05 32.05 0 01167.68 0c17.43 0 31.64 14 32 31.33l.1 5.2a13.2 13.2 0 0023.4 8.31h20.7a32.07 32.07 0 01-30.91 23.7c-17.61 0-31.94-14.42-32.01-32l-.1-4.7v-.2a13.2 13.2 0 00-13.18-12.81 13.2 13.2 0 00-13.18 13.18v4.52a32.05 32.05 0 01-32.01 32.01zM247.94 23.7a13.16 13.16 0 0123.4 8.31 3.77 3.77 0 003.77 3.77h11.3a3.77 3.77 0 003.76-3.77A32.05 32.05 0 00258.16 0a32.07 32.07 0 00-30.92 23.7h20.7z"
@@ -24,19 +24,28 @@ const Vercel = () => (
 const TITLE = {
   "en-US": "React Hooks for Data Fetching",
   "es-ES": "Biblioteca React Hooks para la obtención de datos",
+  ja: "データ取得のための React Hooks ライブラリ",
+  ko: "데이터 가져오기를 위한 React Hooks",
   ru: "React хуки для выборки данных",
+  "zh-CN": "用于数据请求的 React Hooks 库",
 };
 
 const EDIT_TEXT = {
   "en-US": "Edit this page on GitHub →",
   "es-ES": "Edite esta página en GitHub",
+  ja: "Github で編集する",
+  ko: "Github에서 이 페이지 편집하기",
   ru: "Редактировать на GitHub",
+  "zh-CN": "在 GitHub 上编辑本页",
 };
 
 const FOOTER_LINK = {
   "en-US": "https://vercel.com/?utm_source=swr",
   "es-ES": "https://vercel.com/?utm_source=swr_es-es",
+  ja: "https://vercel.com/?utm_source=swr_ja",
+  ko: "https://vercel.com/?utm_source=swr_ko",
   ru: "https://vercel.com/?utm_source=swr_ru",
+  "zh-CN": "https://vercel.com/?utm_source=swr_zh-cn",
 };
 
 const FOOTER_LINK_TEXT = {
@@ -52,10 +61,29 @@ const FOOTER_LINK_TEXT = {
       <Vercel />
     </>
   ),
+  ja: (
+    <>
+      提供
+      <Vercel />
+    </>
+  ),
+  ko: (
+    <>
+      Powered by
+      <Vercel />
+    </>
+  ),
   ru: (
     <>
       Работает на
       <Vercel />
+    </>
+  ),
+  "zh-CN": (
+    <>
+      由
+      <Vercel />
+      驱动
     </>
   ),
 };
@@ -69,7 +97,7 @@ const config: DocsThemeConfig = {
   docsRepositoryBase:
     "https://github.com/shuding/nextra/blob/core/examples/swr-site",
   editLink: {
-    text: function useText() {
+    text() {
       const { locale } = useRouter();
       return EDIT_TEXT[locale];
     },
@@ -77,19 +105,13 @@ const config: DocsThemeConfig = {
   feedback: {
     content: "Question? Give us feedback →",
     labels: "feedback",
-    useLink() {
-      const config = useConfig();
-      return `https://google.com/search?q=${encodeURIComponent(
-        `Feedback for ${config.title}`
-      )}`;
-    },
   },
   footer: {
-    text: function useText() {
+    text() {
       const { locale } = useRouter();
       return (
         <a
-          rel="noreferrer"
+          rel="noopener"
           target="_blank"
           className="flex items-center gap-2 font-semibold"
           href={FOOTER_LINK[locale]}
@@ -99,7 +121,8 @@ const config: DocsThemeConfig = {
       );
     },
   },
-  head: function useHead() {
+  gitTimestamp: ({ timestamp }) => <>Last updated on {timestamp.toString()}</>,
+  head() {
     const config = useConfig();
     const description =
       config.frontMatter.description ||
@@ -149,16 +172,19 @@ const config: DocsThemeConfig = {
   i18n: [
     { locale: "en-US", text: "English" },
     { direction: "rtl", locale: "es-ES", text: "Español RTL" },
+    { locale: "zh-CN", text: "简体中文" },
+    { locale: "ja", text: "日本語" },
+    { locale: "ko", text: "한국어" },
     { locale: "ru", text: "Русский" },
   ],
-  logo: function Logo() {
+  logo() {
     const { locale } = useRouter();
     return (
       <>
-        <SWRLogo className="h-3" />
+        <Logo className="h-3" />
         <span
           className="hidden select-none font-extrabold ltr:ml-2 rtl:mr-2 md:inline"
-          title={`SWR: ${TITLE[locale] || ""}`}
+          title={"SWR: " + (TITLE[locale] || "")}
         >
           SWR
         </span>
@@ -172,21 +198,18 @@ const config: DocsThemeConfig = {
     link: "https://github.com/vercel/swr",
   },
   sidebar: {
-    defaultMenuCollapseLevel: 1,
     titleComponent: ({ title, type }) =>
       type === "separator" ? (
         <div className="flex items-center gap-2">
-          <SWRLogo className="h-1.5 shrink-0" />
+          <Logo className="h-1.5 shrink-0" />
           {title}
         </div>
       ) : (
         <>{title}</>
       ),
-    toggleButton: true,
   },
   toc: {
     extraContent: (
-      // eslint-disable-next-line @next/next/no-img-element -- ignore since url is external and dynamic
       <img alt="placeholder cat" src="https://placekitten.com/g/300/200" />
     ),
     float: true,

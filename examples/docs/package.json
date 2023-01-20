@@ -1,5 +1,5 @@
 {
-  "name": "example-docs",
+  "name": "docs",
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -25,6 +25,5 @@
     "nextra-theme-docs": {
       "injected": true
     }
-  },
-  "version": null
+  }
 }

@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import React, { ReactElement } from 'react'
 import { useMounted } from 'nextra/hooks'
 import { useConfig } from '../contexts'
 import { renderComponent, getGitIssueUrl } from '../utils'
@@ -25,7 +25,7 @@ export function ServerSideErrorPage(): ReactElement | null {
           labels
         })}
         newWindow
-        className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
+        className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:under]"
       >
         {renderComponent(content)}
       </Anchor>

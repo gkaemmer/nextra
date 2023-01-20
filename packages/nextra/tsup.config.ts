@@ -6,7 +6,7 @@ const { target } = tsconfig.compilerOptions
 export default defineConfig([
   {
     name: 'nextra',
-    entry: ['src/index.js', 'src/__temp__.ts'],
+    entry: ['src/index.js'],
     format: 'cjs',
     dts: false,
     target
@@ -19,18 +19,13 @@ export default defineConfig([
       'src/compile.ts',
       'src/icons/index.ts',
       'src/components/index.ts',
-      'src/ssg.tsx',
+      'src/ssg.ts',
       'src/locales.ts',
-      'src/context.ts',
-      'src/layout.tsx',
-      'src/setup-page.ts',
-      'src/remote.ts',
-      'src/mdx.ts'
+      'src/context.ts'
     ],
     format: 'esm',
     dts: true,
-    target,
-    external: ['shiki', './__temp__']
+    target
   },
   {
     entry: ['src/types.ts'],

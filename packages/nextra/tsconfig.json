@@ -8,9 +8,9 @@
     "strict": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "moduleResolution": "node",
-    "types": ["vitest/globals", "webpack-env"],
+    "types": ["vitest/globals"],
     "resolveJsonModule": true
   }
 }

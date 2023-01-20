@@ -9,6 +9,7 @@ export function Card({
   icon,
   image,
   arrow,
+  demo,
   href,
   ...props
 }) {
@@ -84,10 +85,12 @@ export function Cards({ children, num, ...props }) {
     <div
       className={cn(styles.cards, 'mt-4 gap-4')}
       {...props}
-      style={{
-        '--rows': num || 3,
-        ...props.style
-      }}
+      style={
+        {
+          '--rows': num || 3,
+          ...props.style
+        } as any
+      }
     >
       {children}
     </div>

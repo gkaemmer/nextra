@@ -1,4 +1,4 @@
-import {
+import React, {
   ReactElement,
   KeyboardEvent,
   Fragment,
@@ -52,8 +52,8 @@ export function Search({
   }, [value])
 
   useEffect(() => {
-    onActive?.(show)
-  }, [show, onActive])
+    onActive && onActive(show)
+  }, [show])
 
   useEffect(() => {
     const down = (e: globalThis.KeyboardEvent): void => {
@@ -77,21 +77,6 @@ export function Search({
       window.removeEventListener('keydown', down)
     }
   }, [])
-
-  const finishSearch = useCallback(() => {
-    input.current?.blur()
-    onChange('')
-    setShow(false)
-    setMenu(false)
-  }, [onChange, setMenu])
-
-  const handleActive = useCallback(
-    (e: { currentTarget: { dataset: DOMStringMap } }) => {
-      const { index } = e.currentTarget.dataset
-      setActive(Number(index))
-    },
-    []
-  )
 
   const handleKeyDown = useCallback(
     function <T>(e: KeyboardEvent<T>) {
@@ -125,7 +110,7 @@ export function Search({
         case 'Enter': {
           const result = results[active]
           if (result) {
-            void router.push(result.route)
+            router.push(result.route)
             finishSearch()
           }
           break
@@ -137,8 +122,15 @@ export function Search({
         }
       }
     },
-    [active, results, router, finishSearch, handleActive]
+    [active, results, router]
   )
+
+  const finishSearch = () => {
+    input.current?.blur()
+    onChange('')
+    setShow(false)
+    setMenu(false)
+  }
 
   const mounted = useMounted()
   const renderList = show && Boolean(value)
@@ -146,7 +138,7 @@ export function Search({
   const icon = (
     <Transition
       show={mounted && (!show || Boolean(value))}
-      as={Fragment}
+      as={React.Fragment}
       enter="nx-transition-opacity"
       enterFrom="nx-opacity-0"
       enterTo="nx-opacity-100"
@@ -182,6 +174,14 @@ export function Search({
             ))}
       </kbd>
     </Transition>
+  )
+
+  const handleActive = useCallback(
+    (e: { currentTarget: { dataset: DOMStringMap } }) => {
+      const { index } = e.currentTarget.dataset
+      setActive(Number(index))
+    },
+    []
   )
 
   return (

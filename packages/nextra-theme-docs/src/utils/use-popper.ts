@@ -1,9 +1,10 @@
 import { RefCallback, useRef, useCallback, useMemo } from 'react'
 import { createPopper, Options } from '@popperjs/core'
 
+// https://github.com/tailwindlabs/headlessui/issues/59
+
 /**
- * https://github.com/tailwindlabs/headlessui/issues/59
- * Example implementation to use Popper: https://popper.js.org
+ * Example implementation to use Popper: https://popper.js.org/
  */
 export function usePopper(
   options?: Partial<Options>
@@ -11,12 +12,14 @@ export function usePopper(
   const reference = useRef<Element | null>(null)
   const popper = useRef<HTMLElement | null>(null)
 
-  const cleanupCallback = useRef<() => void>()
+  const cleanupCallback = useRef(() => {})
 
-  const instantiatePopper = useCallback(() => {
-    if (!reference.current || !popper.current) return
+  let instantiatePopper = useCallback(() => {
+    if (!reference.current) return
+    if (!popper.current) return
 
-    cleanupCallback.current?.()
+    if (cleanupCallback.current) cleanupCallback.current()
+
     cleanupCallback.current = createPopper(
       reference.current,
       popper.current,

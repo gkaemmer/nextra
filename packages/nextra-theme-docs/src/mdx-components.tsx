@@ -1,4 +1,4 @@
-import {
+import React, {
   useEffect,
   useRef,
   useState,
@@ -9,11 +9,11 @@ import {
   ComponentProps
 } from 'react'
 import 'intersection-observer'
-import { Components } from 'nextra/mdx'
 import { useSetActiveAnchor, DetailsProvider, useDetails } from './contexts'
 import { Collapse, Anchor } from './components'
-import { IS_BROWSER, DocsThemeConfig } from './constants'
+import { IS_BROWSER } from './constants'
 import cn from 'clsx'
+import { DocsThemeConfig } from './types'
 import { Code, Pre, Table, Td, Th, Tr } from 'nextra/components'
 
 let observer: IntersectionObserver
@@ -44,7 +44,7 @@ if (IS_BROWSER) {
         let activeSlug = ''
         let smallestIndexInViewport = Infinity
         let largestIndexAboveViewport = -1
-        for (const s in ret) {
+        for (let s in ret) {
           ret[s].isActive = false
           if (
             ret[s].insideHalfViewport &&
@@ -75,63 +75,60 @@ if (IS_BROWSER) {
 }
 
 // Anchor links
-function HeadingLink({
-  tag: Tag,
-  context,
-  children,
-  id,
-  ...props
-}: ComponentProps<'h2'> & {
-  tag: `h${2 | 3 | 4 | 5 | 6}`
+const createHeaderLink = (
+  Tag: `h${2 | 3 | 4 | 5 | 6}`,
   context: { index: number }
-}): ReactElement {
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- todo: fix React Hook "useSetActiveAnchor" is called conditionally
-  setActiveAnchor ??= useSetActiveAnchor()
-  const obRef = useRef<HTMLAnchorElement>(null)
+) =>
+  function HeaderLink({
+    children,
+    id,
+    ...props
+  }: ComponentProps<'h2'>): ReactElement {
+    setActiveAnchor ??= useSetActiveAnchor()
+    const obRef = useRef<HTMLAnchorElement>(null)
 
-  useEffect(() => {
-    if (!id) return
-    const heading = obRef.current
-    if (!heading) return
+    useEffect(() => {
+      const heading = obRef.current
+      if (!heading) return
 
-    slugs.set(heading, [id, (context.index += 1)])
-    observer.observe(heading)
+      slugs.set(heading, [id, (context.index += 1)])
+      observer.observe(heading)
 
-    return () => {
-      observer.disconnect()
-      slugs.delete(heading)
-      setActiveAnchor(f => {
-        const ret = { ...f }
-        delete ret[id]
-        return ret
-      })
-    }
-  }, [id, context])
+      return () => {
+        observer.disconnect()
+        slugs.delete(heading)
+        setActiveAnchor(f => {
+          const ret = { ...f }
+          delete ret[id!]
+          return ret
+        })
+      }
+    }, [])
 
-  return (
-    <Tag
-      className={cn(
-        'nx-font-semibold nx-tracking-tight nx-text-slate-900 dark:nx-text-slate-100',
-        {
-          h2: 'nx-mt-10 nx-border-b nx-pb-1 nx-text-3xl nx-border-neutral-200/70 contrast-more:nx-border-neutral-400 dark:nx-border-primary-100/10 contrast-more:dark:nx-border-neutral-400',
-          h3: 'nx-mt-8 nx-text-2xl',
-          h4: 'nx-mt-8 nx-text-xl',
-          h5: 'nx-mt-8 nx-text-lg',
-          h6: 'nx-mt-8 nx-text-base'
-        }[Tag]
-      )}
-      {...props}
-    >
-      {children}
-      <span className="nx-absolute -nx-mt-20" id={id} ref={obRef} />
-      <a
-        href={`#${id}`}
-        className="subheading-anchor"
-        aria-label="Permalink for this section"
-      />
-    </Tag>
-  )
-}
+    return (
+      <Tag
+        className={cn(
+          'nx-font-semibold nx-tracking-tight',
+          {
+            h2: 'nx-mt-10 nx-border-b nx-pb-1 nx-text-3xl contrast-more:nx-border-neutral-400 dark:nx-border-primary-100/10 contrast-more:dark:nx-border-neutral-400',
+            h3: 'nx-mt-8 nx-text-2xl',
+            h4: 'nx-mt-8 nx-text-xl',
+            h5: 'nx-mt-8 nx-text-lg',
+            h6: 'nx-mt-8 nx-text-base'
+          }[Tag]
+        )}
+        {...props}
+      >
+        {children}
+        <span className="nx-absolute -nx-mt-20" id={id} ref={obRef} />
+        <a
+          href={`#${id}`}
+          className="subheading-anchor"
+          aria-label="Permalink for this section"
+        />
+      </Tag>
+    )
+  }
 
 const findSummary = (children: ReactNode) => {
   let summary: ReactNode = null
@@ -193,7 +190,7 @@ const Details = ({
       {...(openState && { 'data-expanded': true })}
     >
       <DetailsProvider value={setOpen}>{summary}</DetailsProvider>
-      <Collapse isOpen={openState}>{restChildren}</Collapse>
+      <Collapse open={openState}>{restChildren}</Collapse>
     </details>
   )
 }
@@ -226,38 +223,38 @@ export const getComponents = ({
 }: {
   isRawLayout?: boolean
   components?: DocsThemeConfig['components']
-}): Components => {
+}): DocsThemeConfig['components'] => {
   if (isRawLayout) {
     return { a: A }
   }
 
   const context = { index: 0 }
   return {
-    h1: props => (
+    h1: (props: ComponentProps<'h1'>) => (
       <h1
-        className="nx-mt-2 nx-text-4xl nx-font-bold nx-tracking-tight nx-text-slate-900 dark:nx-text-slate-100"
+        className="nx-mt-2 nx-text-4xl nx-font-bold nx-tracking-tight"
         {...props}
       />
     ),
-    h2: props => <HeadingLink tag="h2" context={context} {...props} />,
-    h3: props => <HeadingLink tag="h3" context={context} {...props} />,
-    h4: props => <HeadingLink tag="h4" context={context} {...props} />,
-    h5: props => <HeadingLink tag="h5" context={context} {...props} />,
-    h6: props => <HeadingLink tag="h6" context={context} {...props} />,
-    ul: props => (
+    h2: createHeaderLink('h2', context),
+    h3: createHeaderLink('h3', context),
+    h4: createHeaderLink('h4', context),
+    h5: createHeaderLink('h5', context),
+    h6: createHeaderLink('h6', context),
+    ul: (props: ComponentProps<'ul'>) => (
       <ul
         className="nx-mt-6 nx-list-disc first:nx-mt-0 ltr:nx-ml-6 rtl:nx-mr-6"
         {...props}
       />
     ),
-    ol: props => (
+    ol: (props: ComponentProps<'ol'>) => (
       <ol
         className="nx-mt-6 nx-list-decimal first:nx-mt-0 ltr:nx-ml-6 rtl:nx-mr-6"
         {...props}
       />
     ),
-    li: props => <li className="nx-my-2" {...props} />,
-    blockquote: props => (
+    li: (props: ComponentProps<'li'>) => <li className="nx-my-2" {...props} />,
+    blockquote: (props: ComponentProps<'blockquote'>) => (
       <blockquote
         className={cn(
           'nx-mt-6 nx-border-gray-300 nx-italic nx-text-gray-700 dark:nx-border-gray-700 dark:nx-text-gray-400',
@@ -266,20 +263,24 @@ export const getComponents = ({
         {...props}
       />
     ),
-    hr: props => <hr className="nx-my-8 dark:nx-border-gray-900" {...props} />,
+    hr: (props: ComponentProps<'hr'>) => (
+      <hr className="nx-my-8 dark:nx-border-gray-900" {...props} />
+    ),
     a: props => (
       <A
         {...props}
-        className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
+        className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:under]"
       />
     ),
-    table: props => (
+    table: (props: ComponentProps<'table'>) => (
       <Table
         className="nextra-scrollbar nx-mt-6 nx-p-0 first:nx-mt-0"
         {...props}
       />
     ),
-    p: props => <p className="nx-mt-6 nx-leading-7 first:nx-mt-0" {...props} />,
+    p: (props: ComponentProps<'p'>) => (
+      <p className="nx-mt-6 nx-leading-7 first:nx-mt-0" {...props} />
+    ),
     tr: Tr,
     th: Th,
     td: Td,

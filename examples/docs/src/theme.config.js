@@ -18,7 +18,7 @@ export default {
     text: 'Edit this page on GitHub'
   },
   faviconGlyph: '✦',
-  useNextSeoProps() {
+  getNextSeoProps() {
     const { frontMatter } = useConfig()
     return {
       additionalLinkTags: [

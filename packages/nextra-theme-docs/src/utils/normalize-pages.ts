@@ -98,20 +98,22 @@ export function normalizePages({
   pageThemeContext?: PageTheme
 }) {
   let _meta: Record<string, any> | undefined
-  for (const item of list) {
+  for (let item of list) {
     if (item.kind === 'Meta') {
       if (item.locale === locale) {
         _meta = item.data
         break
       }
       // fallback
-      _meta ||= item.data
+      if (!_meta) {
+        _meta = item.data
+      }
     }
   }
   const meta = _meta || {}
   const metaKeys = Object.keys(meta)
 
-  for (const key of metaKeys) {
+  for (let key of metaKeys) {
     if (typeof meta[key] === 'string') {
       meta[key] = {
         title: meta[key]
@@ -121,7 +123,7 @@ export function normalizePages({
 
   // All directories
   // - directories: all directories in the tree structure
-  // - flatDirectories: all directories in the flat structure, used by search and footer navigation
+  // - flatDirectories: all directories in the flat structure, used by search
   const directories: Item[] = []
   const flatDirectories: Item[] = []
 
@@ -152,9 +154,8 @@ export function normalizePages({
         // not hidden routes
         !a.name.startsWith('_') &&
         // locale matches, or fallback to default locale
-        (!('locale' in a) ||
-          !a.locale ||
-          [locale, defaultLocale].includes(a.locale))
+        // @ts-expect-error
+        (a.locale === locale || a.locale === defaultLocale || !a.locale)
     )
     .sort((a, b) => {
       const indexA = metaKeys.indexOf(a.name)

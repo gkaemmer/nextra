@@ -1,6 +1,5 @@
 import Slugger from 'github-slugger'
-import { getFlattenedValue } from './remark-headings'
-import { CODE_BLOCK_FILENAME_REGEX } from '../constants'
+import { getFlattenedValue } from './remark'
 
 function visit(node, tagNames, handler) {
   if (tagNames.includes(node.tagName)) {
@@ -10,42 +9,45 @@ function visit(node, tagNames, handler) {
   node.children?.forEach(n => visit(n, tagNames, handler))
 }
 
-export const parseMeta =
+export const parseMeta = () => tree => {
+  visit(tree, ['pre'], node => {
+    const [codeEl] = node.children
+    // Add default language `text` for code-blocks without languages
+    codeEl.properties.className ||= ['language-text']
+    node.__nextra_meta__ = codeEl.data?.meta
+    node.__nextra_text__ = codeEl.children[0].value
+  })
+}
+
+export const attachMeta =
   ({ defaultShowCopyCode }) =>
   tree => {
-    visit(tree, ['pre'], preEl => {
-      const [codeEl] = preEl.children
-      // Add default language `text` for code-blocks without languages
-      codeEl.properties.className ||= ['language-text']
-      const meta = codeEl.data?.meta
-      preEl.__nextra_filename = meta?.match(CODE_BLOCK_FILENAME_REGEX)?.[1]
+    const slugger = new Slugger()
 
-      preEl.__nextra_hasCopyCode = meta
+    visit(tree, ['div', 'h2', 'h3', 'h4', 'h5', 'h6'], node => {
+      if (node.tagName !== 'div') {
+        // Attach slug
+        node.properties.id ||= slugger.slug(getFlattenedValue(node))
+        return
+      }
+      if (!('data-rehype-pretty-code-fragment' in node.properties)) {
+        return
+      }
+      const meta = node.__nextra_meta__
+      const hasCopy = meta
         ? (defaultShowCopyCode && !/( |^)copy=false($| )/.test(meta)) ||
           /( |^)copy($| )/.test(meta)
         : defaultShowCopyCode
+
+      const [preEl] = node.children
+      if (hasCopy) {
+        preEl.properties.value = JSON.stringify(node.__nextra_text__)
+      }
+
+      // Attach filename
+      const filename = meta?.match(/filename="([^"]+)"/)?.[1]
+      if (filename) {
+        preEl.properties.filename = filename
+      }
     })
   }
-
-export const attachMeta = () => tree => {
-  const slugger = new Slugger()
-
-  const headingsWithSlug = new Set(['h2', 'h3', 'h4', 'h5', 'h6'])
-
-  visit(tree, [...headingsWithSlug, 'div', 'pre'], node => {
-    if (headingsWithSlug.has(node.tagName)) {
-      // Attach slug
-      node.properties.id ||= slugger.slug(getFlattenedValue(node))
-      return
-    }
-
-    if ('data-rehype-pretty-code-fragment' in node.properties) {
-      // remove <div data-rehype-pretty-code-fragment /> element that wraps <pre /> element
-      // because we'll wrap with our own <div />
-      Object.assign(node, node.children[0])
-    }
-
-    node.properties.filename = node.__nextra_filename
-    node.properties.hasCopyCode = node.__nextra_hasCopyCode
-  })
-}

@@ -6,7 +6,6 @@ export default defineConfig({
   entry: ['src/index.tsx'],
   format: 'esm',
   dts: true,
-  external: ['nextra'],
   outExtension: () => ({ js: '.js' }),
   target: tsconfig.compilerOptions.target
 })

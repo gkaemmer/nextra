@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { ReactNode, useRef } from 'react'
+import React, { ReactNode, useRef } from 'react'
 import { useBlogContext } from './blog-context'
 import { HeadingContext } from './mdx-theme'
 

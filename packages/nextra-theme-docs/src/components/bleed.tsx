@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react'
+import React, { ReactElement, ReactNode } from 'react'
 import cn from 'clsx'
 
 export function Bleed({

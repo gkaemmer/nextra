@@ -1,4 +1,4 @@
-import { ComponentProps, forwardRef, ReactNode } from 'react'
+import React, { ComponentProps, forwardRef, ReactNode } from 'react'
 import cn from 'clsx'
 
 type InputProps = ComponentProps<'input'> & { suffix?: ReactNode }
@@ -24,5 +24,3 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     </div>
   )
 )
-
-Input.displayName = 'Input'

@@ -1,4 +1,4 @@
-import { ComponentProps, ReactElement } from 'react'
+import React, { ComponentProps, ReactElement } from 'react'
 
 export function GlobeIcon(props: ComponentProps<'svg'>): ReactElement {
   return (

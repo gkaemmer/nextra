@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react'
+import React, { ComponentProps } from 'react'
 
 export const Td = (props: ComponentProps<'td'>) => (
   <td

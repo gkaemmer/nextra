@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react'
+import React, { ReactElement, ReactNode } from 'react'
 import cn from 'clsx'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
@@ -95,7 +95,7 @@ export function Navbar({ flatDirectories, items }: NavBarProps): ReactElement {
         className={cn(
           'nextra-nav-container-blur',
           'nx-pointer-events-none nx-absolute nx-z-[-1] nx-h-full nx-w-full nx-bg-white dark:nx-bg-dark',
-          'nx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] dark:nx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset]',
+          'nx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_-1px_0_rgba(0,0,0,.06)] dark:nx-shadow-[0_-1px_0_rgba(255,255,255,.1)]',
           'contrast-more:nx-shadow-[0_0_0_1px_#000] contrast-more:dark:nx-shadow-[0_0_0_1px_#fff]'
         )}
       />
@@ -156,7 +156,7 @@ export function Navbar({ flatDirectories, items }: NavBarProps): ReactElement {
           return (
             <Anchor
               href={href}
-              key={href}
+              key={page.route}
               className={cn(
                 classes.link,
                 'nx-relative -nx-ml-2 nx-hidden nx-whitespace-nowrap nx-p-2 md:nx-inline-block',
@@ -165,9 +165,7 @@ export function Navbar({ flatDirectories, items }: NavBarProps): ReactElement {
               newWindow={page.newWindow}
               aria-current={!page.newWindow && isActive}
             >
-              <span className="nx-absolute nx-inset-x-0 nx-text-center">
-                {page.title}
-              </span>
+              <span className="nx-absolute">{page.title}</span>
               <span className="nx-invisible nx-font-medium">{page.title}</span>
             </Anchor>
           )

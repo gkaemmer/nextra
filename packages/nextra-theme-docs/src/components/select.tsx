@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react'
+import React, { ReactElement, ReactNode } from 'react'
 import cn from 'clsx'
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon } from 'nextra/icons'
@@ -60,7 +60,7 @@ export function Select({
           {selected.name}
           <Portal>
             <Transition
-              // @ts-expect-error TODO: fix Property 'ref' does not exist on type
+              // @ts-ignore
               ref={container}
               show={open}
               as={Listbox.Options}

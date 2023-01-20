@@ -7,7 +7,7 @@ interface Menu {
 
 const MenuContext = createContext<Menu>({
   menu: false,
-  setMenu: () => false,
+  setMenu: () => {},
 })
 
 export const useMenu = () => useContext(MenuContext)

@@ -2,16 +2,9 @@ import { visit } from 'unist-util-visit'
 import { Plugin } from 'unified'
 import { Root } from 'mdast'
 import path from 'node:path'
-import slash from 'slash'
 import { truthy } from '../utils'
 import { existsSync } from '../file-system'
 import { EXTERNAL_URL_REGEX, PUBLIC_DIR } from '../constants'
-
-/**
- * @ link https://github.com/vercel/next.js/blob/6cfebfb02c2a52a1f99fca59a2eac2d704d053db/packages/next/build/webpack/loaders/next-image-loader.js#L6
- * @ link https://github.com/vercel/next.js/blob/6cfebfb02c2a52a1f99fca59a2eac2d704d053db/packages/next/client/image.tsx#LL702
- */
-const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg']
 
 const getASTNodeImport = (name: string, from: string) => ({
   type: 'mdxjsEsm',
@@ -43,12 +36,16 @@ const getASTNodeImport = (name: string, from: string) => ({
 // Based on the remark-embed-images project
 // https://github.com/remarkjs/remark-embed-images
 export const remarkStaticImage: Plugin<[{ filePath: string }], Root> =
-  () => (tree, _file, done) => {
+  ({ filePath }) =>
+  (tree, _file, done) => {
     const importsToInject: any[] = []
 
     visit(tree, 'image', node => {
       let { url } = node
       if (!url) {
+        console.warn(
+          `[nextra] File "${filePath}" contain image with empty "src" property, skipping…`
+        )
         return
       }
 
@@ -60,14 +57,17 @@ export const remarkStaticImage: Plugin<[{ filePath: string }], Root> =
       if (url.startsWith('/')) {
         const urlPath = path.join(PUBLIC_DIR, url)
         if (!existsSync(urlPath)) {
+          console.error(
+            `[nextra] File "${filePath}" contain image with url "${url}" that not found in "/public" directory, skipping…`
+          )
           return
         }
-        url = slash(urlPath)
+        url = urlPath
       }
       // Unique variable name for the given static image URL.
       const tempVariableName = `$nextraImage${importsToInject.length}`
-      const blur = VALID_BLUR_EXT.some(ext => url.endsWith(ext))
-      // Replace the image node with an MDX component node (Next.js Image).
+
+      // Replace the image node with a MDX component node (Next.js Image).
       Object.assign(node, {
         type: 'mdxJsxFlowElement',
         name: '$NextImageNextra',
@@ -79,7 +79,7 @@ export const remarkStaticImage: Plugin<[{ filePath: string }], Root> =
             name: 'alt',
             value: node.alt
           },
-          blur && {
+          !url.endsWith('.svg') && {
             type: 'mdxJsxAttribute',
             name: 'placeholder',
             value: 'blur'

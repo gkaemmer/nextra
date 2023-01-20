@@ -1,4 +1,3 @@
-import type { Compiler } from 'webpack'
 import {
   NextraConfig,
   FileMap,
@@ -11,18 +10,14 @@ import {
 } from './types'
 import fs from 'graceful-fs'
 import { promisify } from 'node:util'
-import { isSerializable, parseFileName, sortPages, truthy } from './utils'
+import { parseFileName, parseJsonFile, sortPages, truthy } from './utils'
 import path from 'node:path'
 import slash from 'slash'
 import grayMatter from 'gray-matter'
-import pLimit from 'p-limit'
+import { Compiler } from 'webpack'
 
-import {
-  CWD,
-  DYNAMIC_META_FILENAME,
-  MARKDOWN_EXTENSION_REGEX,
-  META_FILENAME
-} from './constants'
+import { restoreCache } from './content-dump'
+import { CWD, MARKDOWN_EXTENSION_REGEX, META_FILENAME } from './constants'
 import { findPagesDirectory } from './file-system'
 
 const readdir = promisify(fs.readdir)
@@ -45,11 +40,8 @@ export const collectMdx = async (
   }
 }
 
-const limit = pLimit(20)
-
 export async function collectFiles(
   dir: string,
-  locales: string[],
   route = '/',
   fileMap: FileMap = Object.create(null)
 ): Promise<{ items: PageMapItem[]; fileMap: FileMap }> {
@@ -66,12 +58,7 @@ export async function collectFiles(
 
     if (isDirectory) {
       if (fileRoute === '/api') return
-      const { items } = await collectFiles(
-        filePath,
-        locales,
-        fileRoute,
-        fileMap
-      )
+      const { items } = await collectFiles(filePath, fileRoute, fileMap)
       if (!items.length) return
       return <Folder>{
         kind: 'Folder',
@@ -81,99 +68,46 @@ export async function collectFiles(
       }
     }
 
-    // add concurrency because folder can contain a lot of files
-    return limit(async () => {
-      if (MARKDOWN_EXTENSION_REGEX.test(ext)) {
-        // We need to filter out dynamic routes, because we can't get all the
-        // paths statically from here — they'll be generated separately.
-        if (name.startsWith('[')) return
+    if (MARKDOWN_EXTENSION_REGEX.test(ext)) {
+      const fp = filePath as MdxPath
+      fileMap[fp] = await collectMdx(fp, fileRoute)
+      return fileMap[fp]
+    }
+    const fileName = name + ext
 
-        const fp = filePath as MdxPath
-        fileMap[fp] = await collectMdx(fp, fileRoute)
-        return fileMap[fp]
+    if (fileName === META_FILENAME) {
+      const fp = filePath as MetaJsonPath
+      const content = await readFile(fp, 'utf8')
+      fileMap[fp] = {
+        kind: 'Meta',
+        ...(locale && { locale }),
+        data: parseJsonFile(content, fp)
       }
+      return fileMap[fp]
+    }
 
-      const fileName = name + ext
-
-      if (fileName === META_FILENAME) {
-        const fp = filePath as MetaJsonPath
-        const content = await readFile(fp, 'utf8')
-        fileMap[fp] = {
-          kind: 'Meta',
-          ...(locale && { locale }),
-          data: JSON.parse(content)
-        }
-        return fileMap[fp]
-      }
-
-      if (fileName === DYNAMIC_META_FILENAME) {
-        // _meta.js file. Need to check if it's dynamic (a function) or not.
-        const metaMod = await import(filePath)
-        const meta = metaMod.default
-        const fp = filePath.replace(/\.js$/, '.json') as MetaJsonPath
-
-        if (typeof meta === 'function') {
-          // Dynamic. Add a special key (__nextra_src) and set data as empty.
-          fileMap[fp] = {
-            kind: 'Meta',
-            ...(locale && { locale }),
-            __nextra_src: filePath,
-            data: {}
-          }
-        } else if (meta && typeof meta === 'object' && isSerializable(meta)) {
-          // Static content, can be statically optimized.
-          fileMap[fp] = {
-            kind: 'Meta',
-            ...(locale && { locale }),
-            data: meta
-          }
-        } else {
-          console.error(
-            `[nextra] "${fileName}" is not a valid meta file. The default export is required to be a serializable object or a function. Please check the following file:`,
-            path.relative(CWD, filePath)
-          )
-        }
-        return fileMap[fp]
-      }
-
-      if (fileName === 'meta.json') {
-        console.warn(
-          '[nextra] "meta.json" was renamed to "_meta.json". Rename the following file:',
-          path.relative(CWD, filePath)
-        )
-      } else if (/_meta\.(jsx|ts|tsx)$/.test(fileName)) {
-        console.error(
-          `[nextra] "${fileName}" is not currently supported, please rename the following file to "${DYNAMIC_META_FILENAME}":`,
-          path.relative(CWD, filePath)
-        )
-      }
-    })
+    if (fileName === 'meta.json') {
+      console.warn(
+        '[nextra] "meta.json" was renamed to "_meta.json". Rename the following file:',
+        path.relative(CWD, filePath)
+      )
+    }
   })
 
   const items = (await Promise.all(promises)).filter(truthy)
 
-  const mdxPagesAndFolders: (MdxFile | Folder)[] = []
-  const mdxPages: MdxFile[] = []
-  const metaLocaleIndexes = new Map<string, number>()
+  const mdxPages = items.filter(
+    (item): item is MdxFile | Folder =>
+      item.kind === 'MdxPage' || item.kind === 'Folder'
+  )
+  const locales = mdxPages
+    .filter((item): item is MdxFile => item.kind === 'MdxPage')
+    .map(item => item.locale)
 
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    if (item.kind === 'MdxPage' || item.kind === 'Folder') {
-      mdxPagesAndFolders.push(item)
-    }
-    if (item.kind === 'MdxPage') {
-      mdxPages.push(item)
-    }
-    if (item.kind === 'Meta') {
-      // It is possible that it doesn't have a locale suffixed, we use '' here.
-      metaLocaleIndexes.set(item.locale || '', i)
-    }
-  }
-
-  // In the current level, find the corresponding meta file for each locale and
-  // extend the fallback meta data we get from the file system.
   for (const locale of locales) {
-    const metaIndex = metaLocaleIndexes.get(locale)
+    const metaIndex = items.findIndex(
+      item => item.kind === 'Meta' && item.locale === locale
+    )
 
     const defaultMeta = sortPages(mdxPages, locale)
 
@@ -183,8 +117,7 @@ export async function collectFiles(
 
     const metaPath = path.join(dir, metaFilename) as MetaJsonPath
 
-    if (metaIndex === undefined) {
-      // Create a new meta file if it doesn't exist.
+    if (metaIndex === -1) {
       fileMap[metaPath] = {
         kind: 'Meta',
         ...(locale && { locale }),
@@ -192,16 +125,15 @@ export async function collectFiles(
       }
       items.push(fileMap[metaPath])
     } else {
-      // Fill with the fallback. Note that we need to keep the original order.
-      const meta = { ...(items[metaIndex] as MetaJsonFile) }
-      for (const [k, v] of defaultMeta) {
-        if (meta.data[k] === undefined) {
-          meta.data[k] = v
+      const { data, ...metaFile } = items[metaIndex] as MetaJsonFile
+      fileMap[metaPath] = {
+        ...metaFile,
+        data: {
+          ...data,
+          ...Object.fromEntries(defaultMeta.filter(([key]) => !(key in data)))
         }
       }
-
-      fileMap[metaPath] = meta
-      items[metaIndex] = meta
+      items[metaIndex] = fileMap[metaPath]
     }
   }
 
@@ -209,10 +141,7 @@ export async function collectFiles(
 }
 
 export class PageMapCache {
-  cache: {
-    items: PageMapItem[]
-    fileMap: FileMap
-  } | null = {
+  cache: { items: PageMapItem[]; fileMap: FileMap } | null = {
     items: [],
     fileMap: Object.create(null)
   }
@@ -234,18 +163,20 @@ export class PageMapCache {
 export const pageMapCache = new PageMapCache()
 
 export class NextraPlugin {
-  constructor(private config: NextraConfig & { locales: string[] }) {}
+  constructor(private config: NextraConfig) {}
 
   apply(compiler: Compiler) {
     compiler.hooks.beforeCompile.tapAsync(
       'NextraPlugin',
       async (_, callback) => {
-        const { locales } = this.config
+        if (this.config?.flexsearch) {
+          // Restore the search data from the cache.
+          restoreCache()
+        }
         const PAGES_DIR = findPagesDirectory()
-        try {
-          const result = await collectFiles(PAGES_DIR, locales)
-          pageMapCache.set(result)
-          callback()
+        const result = await collectFiles(PAGES_DIR)
+        pageMapCache.set(result)
+        callback()
       }
     )
   }

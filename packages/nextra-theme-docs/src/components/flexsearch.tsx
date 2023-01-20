@@ -1,4 +1,4 @@
-import { useState, ReactElement, ReactNode, useCallback } from 'react'
+import React, { useState, ReactElement, ReactNode, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import FlexSearch from 'flexsearch'
 import cn from 'clsx'
@@ -179,7 +179,7 @@ export function Flexsearch({
         sectionIndex.search<true>(search, 5, {
           enrich: true,
           suggest: true,
-          tag: `page_${result.id}`
+          tag: 'page_' + result.id
         })[0]?.result || []
 
       let isFirstItemOfPage = true
@@ -255,7 +255,7 @@ export function Flexsearch({
         setLoading(false)
       }
     },
-    [locale, basePath]
+    [locale]
   )
 
   const handleChange = async (value: string) => {

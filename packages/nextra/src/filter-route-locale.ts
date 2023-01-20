@@ -14,7 +14,7 @@ export default function filterRouteLocale(
   // We fallback to the default locale
   const fallbackPages: Record<string, PageMapItem | null> = Object.create(null)
 
-  for (const page of pageMap) {
+  for (let page of pageMap) {
     if (page.kind === 'Folder') {
       filteredPageMap.push({
         ...page,
