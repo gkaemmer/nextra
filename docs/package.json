@@ -14,7 +14,7 @@
     "framer-motion": "^8.0.0",
     "next": "^13.1.1",
     "nextra": "workspace:*",
-    "nextra-theme-docs": "workspace:*",
+    "nextra-theme-docs-oso": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
