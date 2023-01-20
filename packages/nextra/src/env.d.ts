@@ -1,11 +1,3 @@
-declare module globalThis {
-  import { PageMapItem } from './types'
-  var __nextra_internal__: {
-    pageMap: PageMapItem[]
-    route: string
-  }
-}
-
 declare module 'title' {
   export default function title(
     title: string,
@@ -13,4 +5,12 @@ declare module 'title' {
       special: string[]
     }
   )
+}
+
+declare namespace globalThis {
+  var __nextra_temp_do_not_use: () => void
+}
+
+declare module 'next/dist/compiled/webpack/webpack' {
+  export { default as webpack, sources } from 'webpack'
 }

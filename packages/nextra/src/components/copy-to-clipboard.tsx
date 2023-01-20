@@ -1,4 +1,4 @@
-import React, {
+import {
   ComponentProps,
   ReactElement,
   useCallback,
@@ -9,10 +9,10 @@ import { CheckIcon, CopyIcon } from '../icons'
 import { Button } from './button'
 
 export const CopyToClipboard = ({
-  value,
+  getValue,
   ...props
 }: {
-  value: string
+  getValue: () => string
 } & ComponentProps<'button'>): ReactElement => {
   const [isCopied, setCopied] = useState(false)
 
@@ -35,17 +35,17 @@ export const CopyToClipboard = ({
       console.error('Access to clipboard rejected!')
     }
     try {
-      await navigator.clipboard.writeText(JSON.parse(value))
+      await navigator.clipboard.writeText(getValue())
     } catch {
       console.error('Failed to copy!')
     }
-  }, [value])
+  }, [getValue])
 
   const IconToUse = isCopied ? CheckIcon : CopyIcon
 
   return (
     <Button onClick={handleClick} title="Copy code" tabIndex={0} {...props}>
-      <IconToUse className="nx-pointer-events-none nx-h-4 nx-w-4" />
+      <IconToUse className="nextra-copy-icon nx-pointer-events-none nx-h-4 nx-w-4" />
     </Button>
   )
 }

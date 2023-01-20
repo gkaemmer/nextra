@@ -1,4 +1,6 @@
+/* eslint-env node */
 import { NextraPlugin, pageMapCache } from './plugin'
+import { NextraSearchPlugin } from './search/plugin'
 import {
   DEFAULT_LOCALE,
   DEFAULT_CONFIG,
@@ -8,20 +10,14 @@ import {
 
 const DEFAULT_EXTENSIONS = ['js', 'jsx', 'ts', 'tsx']
 
-const nextra = (...config) =>
+const nextra = (themeOrNextraConfig, themeConfig) =>
   function withNextra(nextConfig = {}) {
-    const nextraConfig = Object.assign(
-      {},
-      DEFAULT_CONFIG,
-      typeof config[0] === 'string'
-        ? {
-            theme: config[0],
-            themeConfig: config[1]
-          }
-        : config[0]
-    )
-
-    const nextraPlugin = new NextraPlugin(nextraConfig)
+    const nextraConfig = {
+      ...DEFAULT_CONFIG,
+      ...(typeof themeOrNextraConfig === 'string'
+        ? { theme: themeOrNextraConfig, themeConfig }
+        : themeOrNextraConfig)
+    }
 
     if (nextConfig.i18n?.locales) {
       console.log(
@@ -29,22 +25,57 @@ const nextra = (...config) =>
       )
     }
 
+    const nextraPlugin = new NextraPlugin({
+      ...nextraConfig,
+      locales: nextConfig.i18n?.locales || ['']
+    })
+
+    const rewrites = async () => {
+      const rules = [
+        {
+          source: '/:path*/_meta',
+          destination: '/404'
+        }
+      ]
+
+      if (nextraPlugin.rewrites) {
+        const originalRewrites = await nextraPlugin.rewrites()
+        if (Array.isArray(originalRewrites)) {
+          return [...originalRewrites, ...rules]
+        }
+        return {
+          ...originalRewrites,
+          beforeFiles: [...(originalRewrites.beforeFiles || []), ...rules]
+        }
+      }
+
+      return rules
+    }
+
+    const nextraLoaderOptions = {
+      ...nextraConfig,
+      locales: nextConfig.i18n?.locales || [''],
+      defaultLocale: nextConfig.i18n?.defaultLocale || DEFAULT_LOCALE,
+      pageMapCache,
+      newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior
+    }
+
     return {
       ...nextConfig,
+      rewrites,
       pageExtensions: [
         ...(nextConfig.pageExtensions || DEFAULT_EXTENSIONS),
         ...MARKDOWN_EXTENSIONS
       ],
       webpack(config, options) {
-        config.plugins ||= []
-        config.plugins.push(nextraPlugin)
+        if (options.nextRuntime !== 'edge' && options.isServer) {
+          config.plugins ||= []
+          config.plugins.push(nextraPlugin)
 
-        const nextraLoaderOptions = {
-          ...nextraConfig,
-          locales: nextConfig.i18n?.locales || [DEFAULT_LOCALE],
-          defaultLocale: nextConfig.i18n?.defaultLocale || DEFAULT_LOCALE,
-          pageMapCache,
-          newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior
+          if (nextraConfig.flexsearch) {
+            const nextraSearchPlugin = new NextraSearchPlugin({})
+            config.plugins.push(nextraSearchPlugin)
+          }
         }
 
         config.module.rules.push(
@@ -75,14 +106,24 @@ const nextra = (...config) =>
                 }
               }
             ]
+          },
+          {
+            // Match dynamic meta files inside pages.
+            test: /_meta(\.[a-z]{2}-[A-Z]{2})?\.js$/,
+            issuer: request => !request,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'nextra/loader',
+                options: {
+                  metaImport: true
+                }
+              }
+            ]
           }
         )
 
-        if (typeof nextConfig.webpack === 'function') {
-          return nextConfig.webpack(config, options)
-        }
-
-        return config
+        return nextConfig.webpack?.(config, options) || config
       }
     }
   }

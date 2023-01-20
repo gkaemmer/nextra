@@ -1,5 +1,5 @@
 {
-  "name": "docs",
+  "name": "example-docs",
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "react-dom": "*",
     "next": ">=13",
     "nextra": "workspace:*",
-    "nextra-theme-docs": "workspace:*"
+    "nextra-theme-docs": "2.2.6"
   },
   "dependenciesMeta": {
     "nextra": {
@@ -25,5 +25,6 @@
     "nextra-theme-docs": {
       "injected": true
     }
-  }
+  },
+  "version": null
 }
