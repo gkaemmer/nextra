@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import { ReactElement } from 'react'
 import NextHead from 'next/head'
 import { useTheme } from 'next-themes'
 import { useMounted } from 'nextra/hooks'
@@ -43,12 +43,12 @@ export function Head(): ReactElement {
           <>
             <meta
               name="theme-color"
-              content="#ffffff"
+              content="#fff"
               media="(prefers-color-scheme: light)"
             />
             <meta
               name="theme-color"
-              content="#111111"
+              content="#111"
               media="(prefers-color-scheme: dark)"
             />
           </>

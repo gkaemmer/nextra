@@ -1,34 +1,40 @@
-import type { PageMapItem, PageOpts } from 'nextra'
-import type { ReactElement, ReactNode } from 'react'
+import type { NextraThemeLayoutProps, PageMapItem, PageOpts } from 'nextra'
 
-import React, { useMemo } from 'react'
+import { useMemo, ReactElement, ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import 'focus-visible'
-import { SkipNavContent } from '@reach/skip-nav'
 import cn from 'clsx'
-import { MDXProvider } from '@mdx-js/react'
+import { MDXProvider } from 'nextra/mdx'
+import { useMounted } from 'nextra/hooks'
 
 import './polyfill'
-import { Head, NavLinks, Sidebar, Breadcrumb, Banner } from './components'
+import {
+  Head,
+  NavLinks,
+  Sidebar,
+  SkipNavContent,
+  Breadcrumb,
+  Banner
+} from './components'
 import { getComponents } from './mdx-components'
 import { ActiveAnchorProvider, ConfigProvider, useConfig } from './contexts'
-import { DEFAULT_LOCALE } from './constants'
+import { DEFAULT_LOCALE, PartialDocsThemeConfig } from './constants'
 import { getFSRoute, normalizePages, renderComponent } from './utils'
-import { DocsThemeConfig, PageTheme, RecursivePartial } from './types'
+import { PageTheme } from './types'
 
 function useDirectoryInfo(pageMap: PageMapItem[]) {
-  const { locale = DEFAULT_LOCALE, defaultLocale, route } = useRouter()
+  const { locale = DEFAULT_LOCALE, defaultLocale, asPath } = useRouter()
 
   return useMemo(() => {
     // asPath can return redirected url
-    const fsPath = getFSRoute(route, locale)
+    const fsPath = getFSRoute(asPath, locale)
     return normalizePages({
       list: pageMap,
       locale,
       defaultLocale,
       route: fsPath
     })
-  }, [pageMap, locale, defaultLocale, route])
+  }, [pageMap, locale, defaultLocale, asPath])
 }
 
 interface BodyProps {
@@ -47,6 +53,7 @@ const Body = ({
   children
 }: BodyProps): ReactElement => {
   const config = useConfig()
+  const mounted = useMounted()
 
   if (themeContext.layout === 'raw') {
     return <div className="nx-w-full nx-overflow-x-hidden">{children}</div>
@@ -57,13 +64,15 @@ const Body = ({
       ? new Date(timestamp)
       : null
 
-  const gitTimestampEl = date ? (
-    <div className="nx-mt-12 nx-mb-8 nx-block nx-text-xs nx-text-gray-500 ltr:nx-text-right rtl:nx-text-left dark:nx-text-gray-400">
-      {renderComponent(config.gitTimestamp, { timestamp: date })}
-    </div>
-  ) : (
-    <div className="nx-mt-16" />
-  )
+  const gitTimestampEl =
+    // Because a user's time zone may be different from the server page
+    mounted && date ? (
+      <div className="nx-mt-12 nx-mb-8 nx-block nx-text-xs nx-text-gray-500 ltr:nx-text-right rtl:nx-text-left dark:nx-text-gray-400">
+        {renderComponent(config.gitTimestamp, { timestamp: date })}
+      </div>
+    ) : (
+      <div className="nx-mt-16" />
+    )
 
   const content = (
     <>
@@ -77,7 +86,7 @@ const Body = ({
 
   if (themeContext.layout === 'full') {
     return (
-      <article className="nx-min-h-[calc(100vh-4rem)] nx-w-full nx-overflow-x-hidden nx-pl-[max(env(safe-area-inset-left),1.5rem)] nx-pr-[max(env(safe-area-inset-right),1.5rem)]">
+      <article className="nextra-content nx-min-h-[calc(100vh-4rem)] nx-w-full nx-overflow-x-hidden nx-pl-[max(env(safe-area-inset-left),1.5rem)] nx-pr-[max(env(safe-area-inset-right),1.5rem)]">
         {body}
       </article>
     )
@@ -86,18 +95,22 @@ const Body = ({
   return (
     <article
       className={cn(
-        'nx-flex nx-min-h-[calc(100vh-4rem)] nx-w-full nx-min-w-0 nx-max-w-full nx-justify-center nx-pb-8 nx-pr-[calc(env(safe-area-inset-right)-1.5rem)]',
+        'nextra-content nx-flex nx-min-h-[calc(100vh-4rem)] nx-w-full nx-min-w-0 nx-max-w-full nx-justify-center nx-pb-8 nx-pr-[calc(env(safe-area-inset-right)-1.5rem)]',
         themeContext.typesetting === 'article' &&
           'nextra-body-typesetting-article'
       )}
     >
-      <main className="nx-w-full nx-min-w-0 nx-max-w-4xl nx-px-6 nx-pt-4 md:nx-px-8">
+      <main className="nx-w-full nx-min-w-0 nx-max-w-6xl nx-px-6 nx-pt-4 md:nx-px-12">
         {breadcrumb}
         {body}
       </main>
     </article>
   )
 }
+
+const tocClassName = cn(
+  'nextra-toc nx-order-last nx-hidden nx-w-64 nx-shrink-0 xl:nx-block'
+)
 
 const InnerLayout = ({
   filePath,
@@ -125,9 +138,6 @@ const InnerLayout = ({
     !themeContext.sidebar ||
     themeContext.layout === 'raw' ||
     activeType === 'page'
-
-  const tocClassName =
-    'nextra-toc nx-order-last nx-hidden nx-w-64 nx-shrink-0 xl:nx-block'
 
   const tocEl =
     activeType === 'page' ||
@@ -219,31 +229,24 @@ const InnerLayout = ({
           </Body>
         </ActiveAnchorProvider>
       </div>
-      {themeContext.footer &&
-        renderComponent(config.footer.component, { menu: hideSidebar })}
+      {renderComponent(config.footer.component, { menu: hideSidebar })}
     </div>
   )
 }
 
-export default function Layout(props: any): ReactElement {
-  const { route } = useRouter()
-  const context = globalThis.__nextra_pageContext__[route]
-  if (!context) throw new Error(`No content found for ${route}.`)
-
-  const { pageOpts, Content } = context
+export default function Layout({
+  children,
+  ...context
+}: NextraThemeLayoutProps): ReactElement {
   return (
     <ConfigProvider value={context}>
-      <InnerLayout {...pageOpts}>
-        <Content {...props} />
-      </InnerLayout>
+      <InnerLayout {...context.pageOpts}>{children}</InnerLayout>
     </ConfigProvider>
   )
 }
 
-type PartialDocsThemeConfig = RecursivePartial<DocsThemeConfig>
-
 export { useConfig, PartialDocsThemeConfig as DocsThemeConfig }
-export { useMDXComponents } from '@mdx-js/react'
+export { useMDXComponents } from 'nextra/mdx'
 export { useTheme } from 'next-themes'
 export {
   Bleed,
@@ -254,5 +257,7 @@ export {
   Tabs,
   Tab,
   Navbar,
+  SkipNavContent,
+  SkipNavLink,
   ThemeSwitch
 } from './components'

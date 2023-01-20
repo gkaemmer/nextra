@@ -299,13 +299,15 @@ Customize the entire navbar component.
   ['sidebar.defaultMenuCollapseLevel', 'number', 'Specifies the folder level at which the menu on the left is collapsed by default. Defaults to 2.'],
   ['sidebar.titleComponent', `React.ReactNode | React.FC<{
   type: string;
-  title: string
+  title: string;
+  route: string;
 }>`, 'Custom renderer for sidebar titles.'],
+  ['sidebar.toggleButton', 'boolean', 'Hide/show sidebar toggle button. Defaults to `false`.']
 ]}/>
 
 ### Menu Collapse Level
 
-By default, the sidebar menu is collapsed at level `2`. You can change it by setting `sidebar.defaultMenuCollapseLevel` to a different number. For example, when set to `0`, every folder will be collapsed by default and when set to `Infinity`, all nested folders will be expanded by default.
+By default, the sidebar menu is collapsed at level `2`. You can change it by setting `sidebar.defaultMenuCollapseLevel` to a different number. For example, when set to `1`, every folder will be collapsed by default and when set to `Infinity`, all nested folders will be expanded by default.
 
 ### Customize sidebar content
 
@@ -417,6 +419,7 @@ The built-in feedback link provides a way for users to submit feedback about the
 <OptionTable options={[
   ['feedback.content', 'React.ReactNode | React.FC', 'Content of the feedback button.'],
   ['feedback.labels', 'string', 'Labels that can be added to the new created GitHub issue.'],
+  ['feedback.useLink', '() => string', 'Custom link, by default, will open an issue in the repository set in `docsRepositoryBase`.'],
 ]}/>
 
 To disable it, you can set `feedback.content` to `null`.

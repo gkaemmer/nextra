@@ -85,6 +85,12 @@ exports[`Page Process > pageMap en-US 1`] = `
           "title": "Nextra ↗",
           "type": "page",
         },
+        "remote": {
+          "display": "children",
+          "href": "/remote/foo",
+          "title": "Remote",
+          "type": "page",
+        },
       },
       "kind": "Meta",
       "locale": "en-US",
@@ -125,6 +131,10 @@ exports[`Page Process > pageMap en-US 1`] = `
           "name": "team",
           "route": "/about/team",
         },
+        {
+          "data": {},
+          "kind": "Meta",
+        },
       ],
       "kind": "Folder",
       "name": "about",
@@ -153,6 +163,10 @@ exports[`Page Process > pageMap en-US 1`] = `
           "locale": "en-US",
           "name": "swr-v1",
           "route": "/blog/swr-v1",
+        },
+        {
+          "data": {},
+          "kind": "Meta",
         },
       ],
       "kind": "Folder",
@@ -191,14 +205,12 @@ exports[`Page Process > pageMap en-US 1`] = `
               "title": "Advanced",
             },
             "arguments": "Arguments",
-            "callout": "Callout",
             "change-log": {
               "theme": {
                 "sidebar": false,
               },
               "title": "Change Log",
             },
-            "code-block-without-language": "Code Block without Language",
             "conditional-fetching": "Conditional Data Fetching",
             "data-fetching": "Data Fetching",
             "error-handling": {
@@ -246,14 +258,8 @@ exports[`Page Process > pageMap en-US 1`] = `
                   "title": "Do Not Use",
                   "type": "separator",
                 },
-                "cache": "Cache",
-                "code-highlighting": "Code Highlighting",
                 "file-name.with.DOTS": "Filenames with Dots",
-                "future-image": "Future Image",
-                "markdown-import": "Markdown Import",
                 "more": "More: A Super Super Super Super Long Directory",
-                "performance": "Performance",
-                "react-native": "React Native",
               },
               "kind": "Meta",
               "locale": "en-US",
@@ -300,25 +306,24 @@ exports[`Page Process > pageMap en-US 1`] = `
                   "children": [
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "one",
                       "route": "/docs/advanced/more/tree/one",
                     },
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "three",
                       "route": "/docs/advanced/more/tree/three",
                     },
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "two",
                       "route": "/docs/advanced/more/tree/two",
                     },
                     {
-                      "data": {
-                        "one": "One",
-                        "three": "Three",
-                        "two": "Two",
-                      },
+                      "data": {},
                       "kind": "Meta",
                     },
                   ],
@@ -327,12 +332,7 @@ exports[`Page Process > pageMap en-US 1`] = `
                   "route": "/docs/advanced/more/tree",
                 },
                 {
-                  "data": {
-                    "loooooooooooooooooooong-title": "Loooooooooooooooooooong Title",
-                    "tree": "Tree",
-                  },
                   "kind": "Meta",
-                  "locale": "en-US",
                 },
               ],
               "kind": "Folder",
@@ -350,6 +350,10 @@ exports[`Page Process > pageMap en-US 1`] = `
               "locale": "en-US",
               "name": "react-native",
               "route": "/docs/advanced/react-native",
+            },
+            {
+              "data": {},
+              "kind": "Meta",
             },
           ],
           "kind": "Folder",
@@ -473,6 +477,12 @@ exports[`Page Process > pageMap en-US 1`] = `
         {
           "kind": "MdxPage",
           "locale": "en-US",
+          "name": "understanding",
+          "route": "/docs/understanding",
+        },
+        {
+          "kind": "MdxPage",
+          "locale": "en-US",
           "name": "with-nextjs",
           "route": "/docs/with-nextjs",
         },
@@ -481,6 +491,10 @@ exports[`Page Process > pageMap en-US 1`] = `
           "locale": "en-US",
           "name": "wrap-toc-items",
           "route": "/docs/wrap-toc-items",
+        },
+        {
+          "data": {},
+          "kind": "Meta",
         },
       ],
       "kind": "Folder",
@@ -562,6 +576,10 @@ exports[`Page Process > pageMap en-US 1`] = `
           "name": "ssr",
           "route": "/examples/ssr",
         },
+        {
+          "data": {},
+          "kind": "Meta",
+        },
       ],
       "kind": "Folder",
       "name": "examples",
@@ -578,66 +596,72 @@ exports[`Page Process > pageMap en-US 1`] = `
       "route": "/",
     },
     {
-      "data": {
-        "404": "404",
-        "500": "500",
-        "about": "About",
-        "blog": "Blog",
-        "docs": "Docs",
-        "examples": "Examples",
+      "children": [
+        {
+          "data": {},
+          "kind": "Meta",
+          "locale": "en-US",
+        },
+        {
+          "data": {},
+          "kind": "Meta",
+        },
+      ],
+      "kind": "Folder",
+      "name": "remote",
+      "route": "/remote",
+    },
+    {
+      "frontMatter": {
+        "mdxOptions": {
+          "format": "md",
+        },
       },
+      "kind": "MdxPage",
+      "locale": "en-US",
+      "name": "test",
+      "route": "/test",
+    },
+    {
+      "data": {},
       "kind": "Meta",
     },
   ],
   "/docs/data-fetching",
-  "Data Fetching",
 ]
 `;
 
-exports[`Page Process > pageMap zh-CN 1`] = `
+exports[`Page Process > pageMap ru 1`] = `
 [
   [
     {
       "data": {
-        "about": "About",
         "blog": {
-          "title": "博客",
+          "title": "Блог",
           "type": "page",
         },
         "docs": {
-          "title": "文档",
+          "title": "Документация",
           "type": "page",
         },
         "examples": {
-          "title": "示例",
+          "title": "Примеры",
           "type": "page",
         },
         "index": {
           "display": "hidden",
-          "title": "简介",
+          "title": "Введение",
           "type": "page",
         },
       },
       "kind": "Meta",
-      "locale": "zh-CN",
+      "locale": "ru",
     },
     {
       "children": [
         {
-          "data": {
-            "a-page": {
-              "display": "hidden",
-              "theme": {
-                "layout": "raw",
-              },
-              "title": "A Page",
-              "type": "page",
-            },
-            "acknowledgement": "🧩 Acknowledgement",
-            "team": "👥 Team",
-          },
+          "data": {},
           "kind": "Meta",
-          "locale": "en-US",
         },
         {
           "kind": "MdxPage",
@@ -666,18 +690,18 @@ exports[`Page Process > pageMap zh-CN 1`] = `
       "children": [
         {
           "data": {
-            "swr-v1": "SWR 1.0 发布",
+            "swr-v1": "Представляем SWR 1.0",
           },
           "kind": "Meta",
-          "locale": "zh-CN",
+          "locale": "ru",
         },
         {
           "frontMatter": {
-            "description": "大约两年前，我们开源了 SWR，大家喜爱的小型数据请求 React 库。今天，我们迎来了另一个里程碑：SWR 1.0 版本发布。",
+            "description": "Почти 2 года назад мы сделали SWR — крошечную React библиотеку с открытым исходным кодом для выборки данных, которую люди полюбили. Сегодня мы приближаемся к еще одной вехе: версии 1.0 SWR!",
             "image": "https://assets.vercel.com/image/upload/v1630059453/swr/v1.png",
           },
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "swr-v1",
           "route": "/blog/swr-v1",
         },
@@ -690,50 +714,49 @@ exports[`Page Process > pageMap zh-CN 1`] = `
       "children": [
         {
           "data": {
-            "advanced": "高级",
-            "arguments": "传入参数",
-            "change-log": "更新日志",
-            "conditional-fetching": "条件数据请求",
-            "data-fetching": "数据请求",
-            "error-handling": "错误处理",
-            "getting-started": "入门",
-            "global-configuration": "全局配置",
-            "middleware": "中间件",
-            "mutation": "数据更改",
-            "options": "选项",
-            "pagination": "分页",
-            "prefetching": "预请求",
-            "revalidation": "自动重新请求",
-            "suspense": "Suspense",
+            "advanced": "Продвинутые",
+            "arguments": "Аргументы",
+            "change-log": "Журнал изменений",
+            "conditional-fetching": "Условная выборка данных",
+            "data-fetching": "Выборка данных",
+            "error-handling": "Обработка ошибок",
+            "getting-started": "Начало работы",
+            "global-configuration": "Глобальная конфигурация",
+            "middleware": "Промежуточное ПО (Middleware)",
+            "mutation": "Мутация",
+            "options": "Опции",
+            "pagination": "Пагинация",
+            "prefetching": "Пред-выборка",
+            "revalidation": "Авто-ревалидация",
+            "suspense": "Задержка (Suspense)",
             "typescript": "Typescript",
-            "with-nextjs": "Next.js SSG 和 SSR",
-            "wrap-toc-items": "包裝目錄項",
+            "with-nextjs": "Next.js SSG и SSR",
+            "wrap-toc-items": "Обернуть таблицу содержимого элементов",
           },
           "kind": "Meta",
-          "locale": "zh-CN",
+          "locale": "ru",
         },
         {
           "children": [
             {
               "data": {
-                "cache": "缓存",
-                "file-name.with.DOTS": "带点的文件名",
-                "more": "More",
-                "performance": "性能",
+                "cache": "Кеш",
+                "file-name.with.DOTS": "Имя файла может содержать точки",
+                "performance": "Производительность",
                 "react-native": "React Native",
               },
               "kind": "Meta",
-              "locale": "zh-CN",
+              "locale": "ru",
             },
             {
               "kind": "MdxPage",
-              "locale": "zh-CN",
+              "locale": "ru",
               "name": "cache",
               "route": "/docs/advanced/cache",
             },
             {
               "kind": "MdxPage",
-              "locale": "zh-CN",
+              "locale": "ru",
               "name": "file-name.with.DOTS",
               "route": "/docs/advanced/file-name.with.DOTS",
             },
@@ -743,25 +766,24 @@ exports[`Page Process > pageMap zh-CN 1`] = `
                   "children": [
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "one",
                       "route": "/docs/advanced/more/tree/one",
                     },
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "three",
                       "route": "/docs/advanced/more/tree/three",
                     },
                     {
                       "kind": "MdxPage",
+                      "locale": "en-US",
                       "name": "two",
                       "route": "/docs/advanced/more/tree/two",
                     },
                     {
-                      "data": {
-                        "one": "One",
-                        "three": "Three",
-                        "two": "Two",
-                      },
+                      "data": {},
                       "kind": "Meta",
                     },
                   ],
@@ -776,12 +798,8 @@ exports[`Page Process > pageMap zh-CN 1`] = `
                   "route": "/docs/advanced/more/loooooooooooooooooooong-title",
                 },
                 {
-                  "data": {
-                    "loooooooooooooooooooong-title": "Loooooooooooooooooooong Title",
-                    "tree": "Tree",
-                  },
+                  "data": {},
                   "kind": "Meta",
-                  "locale": "en-US",
                 },
               ],
               "kind": "Folder",
@@ -790,13 +808,13 @@ exports[`Page Process > pageMap zh-CN 1`] = `
             },
             {
               "kind": "MdxPage",
-              "locale": "zh-CN",
+              "locale": "ru",
               "name": "performance",
               "route": "/docs/advanced/performance",
             },
             {
               "kind": "MdxPage",
-              "locale": "zh-CN",
+              "locale": "ru",
               "name": "react-native",
               "route": "/docs/advanced/react-native",
             },
@@ -825,97 +843,103 @@ exports[`Page Process > pageMap zh-CN 1`] = `
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "arguments",
           "route": "/docs/arguments",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "change-log",
           "route": "/docs/change-log",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "conditional-fetching",
           "route": "/docs/conditional-fetching",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "data-fetching",
           "route": "/docs/data-fetching",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "error-handling",
           "route": "/docs/error-handling",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "getting-started",
           "route": "/docs/getting-started",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "global-configuration",
           "route": "/docs/global-configuration",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "middleware",
           "route": "/docs/middleware",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "mutation",
           "route": "/docs/mutation",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "options",
           "route": "/docs/options",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "pagination",
           "route": "/docs/pagination",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "prefetching",
           "route": "/docs/prefetching",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "revalidation",
           "route": "/docs/revalidation",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "suspense",
           "route": "/docs/suspense",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
+          "name": "understanding",
+          "route": "/docs/understanding",
+        },
+        {
+          "kind": "MdxPage",
+          "locale": "ru",
           "name": "with-nextjs",
           "route": "/docs/with-nextjs",
         },
         {
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "wrap-toc-items",
           "route": "/docs/wrap-toc-items",
         },
@@ -964,60 +988,54 @@ exports[`Page Process > pageMap zh-CN 1`] = `
       "children": [
         {
           "data": {
-            "auth": "身份验证",
-            "basic": "基本用法",
-            "error-handling": "错误处理",
-            "infinite-loading": "无限加载",
+            "auth": "Аутентификация",
+            "basic": "Основное использование",
+            "error-handling": "Обработка ошибок",
+            "infinite-loading": "Бесконечная загрузка",
             "ssr": "Next.js SSR",
           },
           "kind": "Meta",
-          "locale": "zh-CN",
+          "locale": "ru",
         },
         {
           "frontMatter": {
             "full": true,
-            "title": "身份验证",
+            "title": "Аутентификация",
           },
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "auth",
           "route": "/examples/auth",
         },
         {
           "frontMatter": {
             "full": true,
-            "title": "基本用法",
+            "title": "Основное использование",
           },
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "basic",
           "route": "/examples/basic",
         },
         {
           "frontMatter": {
             "full": true,
-            "title": "错误处理",
+            "title": "Обработка ошибок",
           },
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "error-handling",
           "route": "/examples/error-handling",
         },
         {
           "frontMatter": {
             "full": true,
-            "title": "无限加载",
+            "title": "Бесконечная загрузка",
           },
           "kind": "MdxPage",
-          "locale": "zh-CN",
+          "locale": "ru",
           "name": "infinite-loading",
           "route": "/examples/infinite-loading",
-        },
-        {
-          "kind": "MdxPage",
-          "locale": "en-US",
-          "name": "full",
-          "route": "/examples/full",
         },
         {
           "frontMatter": {
@@ -1025,9 +1043,15 @@ exports[`Page Process > pageMap zh-CN 1`] = `
             "title": "Next.js SSR",
           },
           "kind": "MdxPage",
-          "locale": "en-US",
+          "locale": "ru",
           "name": "ssr",
           "route": "/examples/ssr",
+        },
+        {
+          "kind": "MdxPage",
+          "locale": "en-US",
+          "name": "full",
+          "route": "/examples/full",
         },
       ],
       "kind": "Folder",
@@ -1036,12 +1060,23 @@ exports[`Page Process > pageMap zh-CN 1`] = `
     },
     {
       "frontMatter": {
-        "title": "用于数据请求的 React Hooks 库",
+        "title": "React хуки для получения данных",
       },
       "kind": "MdxPage",
-      "locale": "zh-CN",
+      "locale": "ru",
       "name": "index",
       "route": "/",
+    },
+    {
+      "children": [
+        {
+          "data": {},
+          "kind": "Meta",
+        },
+      ],
+      "kind": "Folder",
+      "name": "remote",
+      "route": "/remote",
     },
     {
       "kind": "MdxPage",
@@ -1062,8 +1097,18 @@ exports[`Page Process > pageMap zh-CN 1`] = `
       "name": "blog",
       "route": "/blog",
     },
+    {
+      "frontMatter": {
+        "mdxOptions": {
+          "format": "md",
+        },
+      },
+      "kind": "MdxPage",
+      "locale": "en-US",
+      "name": "test",
+      "route": "/test",
+    },
   ],
   "/docs/data-fetching",
-  "数据请求",
 ]
 `;

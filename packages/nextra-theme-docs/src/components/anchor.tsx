@@ -1,5 +1,5 @@
 import next from 'next/package.json'
-import React, { forwardRef, ComponentProps, ReactElement } from 'react'
+import { forwardRef, ComponentProps, ReactElement } from 'react'
 // eslint-disable-next-line no-restricted-imports -- only in this file we determine either we include <a /> as child of <NextLink /> based of `newNextLinkBehavior` value
 import NextLink from 'next/link'
 import { useConfig } from '../contexts'
@@ -26,7 +26,8 @@ export const Anchor = forwardRef<HTMLAnchorElement, AnchorProps>(function (
         rel="noreferrer"
         {...props}
       >
-        {children}<span className="nx-sr-only"> (opens in a new tab)</span>
+        {children}
+        <span className="nx-sr-only"> (opens in a new tab)</span>
       </a>
     )
   }
@@ -55,3 +56,5 @@ export const Anchor = forwardRef<HTMLAnchorElement, AnchorProps>(function (
     </NextLink>
   )
 })
+
+Anchor.displayName = 'Anchor'
