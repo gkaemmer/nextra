@@ -1,18 +1,15 @@
 import type { LoaderOptions, MdxPath, PageOpts } from './types'
+import type { LoaderContext } from 'webpack'
 
 import path from 'node:path'
-import grayMatter from 'gray-matter'
 import slash from 'slash'
-import { LoaderContext } from 'webpack'
 
-import { addPage } from './content-dump'
-import { parseFileName } from './utils'
+import { hashFnv32a, pageTitleFromFilename, parseFileName } from './utils'
 import { compileMdx } from './compile'
-import { getPageMap } from './page-map'
+import { resolvePageMap } from './page-map'
 import { collectFiles, collectMdx } from './plugin'
 import {
   IS_PRODUCTION,
-  DEFAULT_LOCALE,
   OFFICIAL_THEMES,
   MARKDOWN_EXTENSION_REGEX,
   CWD
@@ -20,9 +17,6 @@ import {
 import { findPagesDirectory } from './file-system'
 
 const PAGES_DIR = findPagesDirectory()
-
-// TODO: create this as a webpack plugin.
-const indexContentEmitted = new Set<string>()
 
 const IS_WEB_CONTAINER = !!process.versions.webcontainer
 
@@ -61,20 +55,30 @@ async function loader(
   source: string
 ): Promise<string> {
   const {
+    metaImport,
     pageImport,
     theme,
     themeConfig,
+    locales,
     defaultLocale,
     defaultShowCopyCode,
     flexsearch,
+    latex,
     staticImage,
     readingTime: _readingTime,
     mdxOptions,
     pageMapCache,
-    newNextLinkBehavior
+    newNextLinkBehavior,
+    transform,
+    codeHighlight
   } = context.getOptions()
 
   context.cacheable(true)
+
+  // _meta.js used as a page.
+  if (metaImport) {
+    return 'export default () => null'
+  }
 
   // Check if there's a theme provided
   if (!theme) {
@@ -92,76 +96,117 @@ async function loader(
 
   const { items, fileMap } = IS_PRODUCTION
     ? pageMapCache.get()!
-    : await collectFiles(PAGES_DIR)
+    : await collectFiles(PAGES_DIR, locales)
 
   // mdx is imported but is outside the `pages` directory
   if (!fileMap[mdxPath]) {
     fileMap[mdxPath] = await collectMdx(mdxPath)
-    context.addMissingDependency(mdxPath)
+    if (!IS_PRODUCTION) {
+      context.addMissingDependency(mdxPath)
+    }
   }
 
   const { locale } = parseFileName(mdxPath)
+  const isLocalTheme = theme.startsWith('.') || theme.startsWith('/')
+  const pageNextRoute =
+    '/' +
+    slash(path.relative(PAGES_DIR, mdxPath))
+      // Remove the `mdx?` extension
+      .replace(MARKDOWN_EXTENSION_REGEX, '')
+      // Remove the `*/index` suffix
+      .replace(/\/index$/, '')
+      // Remove the only `index` route
+      .replace(/^index$/, '')
 
-  for (const [filePath, file] of Object.entries(fileMap)) {
-    if (file.kind === 'Meta' && (!locale || file.locale === locale)) {
-      context.addDependency(filePath)
+  if (!IS_PRODUCTION) {
+    for (const [filePath, file] of Object.entries(fileMap)) {
+      if (file.kind === 'Meta' && (!locale || file.locale === locale)) {
+        context.addDependency(filePath)
+      }
+    }
+    // Add the entire directory `pages` as the dependency,
+    // so we can generate the correct page map.
+    context.addContextDependency(PAGES_DIR)
+
+    // Add local theme as a dependency
+    if (isLocalTheme) {
+      context.addDependency(path.resolve(theme))
+    }
+    // Add theme config as a dependency
+    if (themeConfig) {
+      context.addDependency(path.resolve(themeConfig))
     }
   }
-  // Add the entire directory `pages` as the dependency,
-  // so we can generate the correct page map.
-  context.addContextDependency(PAGES_DIR)
 
-  // Extract frontMatter information if it exists
-  const { data: frontMatter, content } = grayMatter(source)
-
-  const { result, headings, structurizedData, hasJsxInH1, readingTime } =
-    await compileMdx(
-      content,
-      {
-        mdxOptions: {
-          ...mdxOptions,
-          jsx: true,
-          outputFormat: 'program'
-        },
-        readingTime: _readingTime,
-        defaultShowCopyCode,
-        staticImage,
-        flexsearch
+  const {
+    result,
+    headings,
+    title,
+    frontMatter,
+    structurizedData,
+    searchIndexKey,
+    hasJsxInH1,
+    readingTime
+  } = await compileMdx(
+    source,
+    {
+      mdxOptions: {
+        ...mdxOptions,
+        jsx: true,
+        outputFormat: 'program'
       },
-      mdxPath
-    )
-  // @ts-expect-error
-  const cssImport = OFFICIAL_THEMES.includes(theme)
+      readingTime: _readingTime,
+      defaultShowCopyCode,
+      staticImage,
+      flexsearch,
+      latex,
+      codeHighlight,
+      route: pageNextRoute,
+      locale
+    },
+    mdxPath,
+    false // TODO: produce hydration errors or error - Create a new processor first, by calling it: use `processor()` instead of `processor`.
+  )
+
+  const katexCssImport = latex ? "import 'katex/dist/katex.min.css'" : ''
+  const cssImport = OFFICIAL_THEMES.includes(
+    theme as (typeof OFFICIAL_THEMES)[number]
+  )
     ? `import '${theme}/style.css'`
     : ''
 
   // Imported as a normal component, no need to add the layout.
   if (!pageImport) {
-    return `
-${cssImport}
+    return `${cssImport}
 ${result}
-export default MDXContent`.trimStart()
+export default MDXContent`
   }
 
-  const { route, title, pageMap } = getPageMap({
+  const { route, pageMap, dynamicMetaItems } = resolvePageMap({
     filePath: mdxPath,
     fileMap,
     defaultLocale,
-    pageMap: items
+    items
   })
 
-  const skipFlexsearchIndexing =
-    IS_PRODUCTION && indexContentEmitted.has(mdxPath)
-  if (flexsearch && !skipFlexsearchIndexing) {
+  // Logic for resolving the page title (used for search and as fallback):
+  // 1. If the frontMatter has a title, use it.
+  // 2. Use the first h1 heading if it exists.
+  // 3. Use the fallback, title-cased file name.
+  const fallbackTitle =
+    frontMatter.title || title || pageTitleFromFilename(fileMap[mdxPath].name)
+
+  if (searchIndexKey) {
     if (frontMatter.searchable !== false) {
-      addPage({
-        locale: locale || DEFAULT_LOCALE,
-        route,
-        title,
-        structurizedData
-      })
+      // Store all the things in buildInfo.
+      const buildInfo = (context._module as any).buildInfo
+      buildInfo.nextraSearch = {
+        indexKey: searchIndexKey,
+        title: fallbackTitle,
+        data: structurizedData,
+        route: pageNextRoute
+      }
     }
-    indexContentEmitted.add(mdxPath)
   }
 
   let timestamp: PageOpts['timestamp']
@@ -177,14 +222,13 @@ export default MDXContent`.trimStart()
   }
 
   // Relative path instead of a package name
-  const layout =
-    theme.startsWith('.') || theme.startsWith('/') ? path.resolve(theme) : theme
+  const layout = isLocalTheme ? path.resolve(theme) : theme
 
   const themeConfigImport = themeConfig
-    ? `import __nextra_themeConfig__ from '${slash(path.resolve(themeConfig))}'`
+    ? `import __nextra_themeConfig from '${slash(path.resolve(themeConfig))}'`
     : ''
 
-  const pageOpts: Omit<PageOpts, 'title'> = {
+  const pageOpts: PageOpts = {
     filePath: slash(path.relative(CWD, mdxPath)),
     route,
     frontMatter,
@@ -194,56 +238,43 @@ export default MDXContent`.trimStart()
     timestamp,
     flexsearch,
     newNextLinkBehavior,
-    readingTime
+    readingTime,
+    title: fallbackTitle
   }
 
-  const pageNextRoute =
-    '/' +
-    slash(path.relative(PAGES_DIR, mdxPath))
-      // Remove the `mdx?` extension
-      .replace(MARKDOWN_EXTENSION_REGEX, '')
-      // Remove the `*/index` suffix
-      .replace(/\/index$/, '')
-      // Remove the only `index` route
-      .replace(/^index$/, '')
+  const finalResult = transform
+    ? await transform(result, { route: pageNextRoute })
+    : result
 
-  return `
-import { SSGContext as __nextra_SSGContext__ } from 'nextra/ssg'
+  const stringifiedPageOpts = JSON.stringify(pageOpts)
+
+  return `import { setupNextraPage } from 'nextra/setup-page'
+import __nextra_layout from '${layout}'
 ${themeConfigImport}
+${katexCssImport}
 ${cssImport}
 
-const __nextra_pageOpts__ = ${JSON.stringify(pageOpts)}
+${finalResult}
 
-globalThis.__nextra_internal__ = {
-  pageMap: __nextra_pageOpts__.pageMap,
-  route: __nextra_pageOpts__.route
-}
+setupNextraPage({
+  pageNextRoute: ${JSON.stringify(pageNextRoute)},
+  pageOpts: ${stringifiedPageOpts},
+  nextraLayout: __nextra_layout,
+  themeConfig: ${themeConfigImport ? '__nextra_themeConfig' : 'null'},
+  Content: MDXContent,
+  hot: module.hot,
+  pageOptsChecksum: ${JSON.stringify(hashFnv32a(stringifiedPageOpts))},
+  dynamicMetaModules: typeof window !== 'undefined' ? [] : [${dynamicMetaItems
+    .map(
+      descriptor =>
+        `[import(${JSON.stringify(descriptor.metaFilePath)}), ${JSON.stringify(
+          descriptor
+        )}]`
+    )
+    .join(',')}]
+})
 
-${result}
-
-__nextra_pageOpts__.title =
-  ${JSON.stringify(frontMatter.title)} ||
-  (typeof __nextra_title__ === 'string' && __nextra_title__) ||
-  ${JSON.stringify(title /* Fallback as sidebar link name */)}
-
-const Content = props => (
-  <__nextra_SSGContext__.Provider value={props}>
-    <MDXContent />
-  </__nextra_SSGContext__.Provider>
-)
-
-globalThis.__nextra_pageContext__ ||= Object.create(null)
-
-// Make sure the same component is always returned so Next.js will render the
-// stable layout. We then put the actual content into a global store and use
-// the route to identify it.
-globalThis.__nextra_pageContext__[${JSON.stringify(pageNextRoute)}] = {
-  Content,
-  pageOpts: __nextra_pageOpts__,
-  themeConfig: ${themeConfigImport ? '__nextra_themeConfig__' : 'null'}
-}
-
-export { default } from '${layout}'`.trimStart()
+export { default } from 'nextra/layout'`
 }
 
 export default function syncLoader(

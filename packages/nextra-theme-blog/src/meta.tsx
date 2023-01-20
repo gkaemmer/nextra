@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import { ReactElement } from 'react'
 import Link from 'next/link'
 import ThemeSwitch from './theme-switch'
 import { split } from './utils/get-tags'
@@ -53,7 +53,9 @@ export default function Meta(): ReactElement {
               {new Date(date).toDateString()}
             </time>
           )}
-          {(author || date) && tags.length > 0 && '  •  '}
+          {(author || date) && (readingTime || tags.length > 0) && (
+            <span className="nx-px-1">•</span>
+          )}
           {readingTime || tagsEl}
         </div>
         {readingTime && (

@@ -18,21 +18,6 @@ export function parseFileName(filePath: string): {
   }
 }
 
-export const parseJsonFile = (
-  content: string,
-  path: string
-): Record<string, any> => {
-  try {
-    return JSON.parse(content)
-  } catch (err) {
-    console.error(
-      `[nextra] Error parsing ${path}, make sure it's a valid JSON`,
-      err
-    )
-    return {}
-  }
-}
-
 type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T // from lodash
 
 export function truthy<T>(value: T): value is Truthy<T> {
@@ -41,6 +26,10 @@ export function truthy<T>(value: T): value is Truthy<T> {
 
 export function normalizeMeta(meta: Meta): Exclude<Meta, string> {
   return typeof meta === 'string' ? { title: meta } : meta
+}
+
+export function pageTitleFromFilename(fileName: string) {
+  return title(fileName.replace(/[-_]/g, ' '))
 }
 
 export function sortPages(
@@ -57,7 +46,7 @@ export function sortPages(
       date: 'frontMatter' in item && item.frontMatter?.date,
       title:
         ('frontMatter' in item && item.frontMatter?.title) ||
-        title(item.name.replace(/[-_]/g, ' '))
+        pageTitleFromFilename(item.name)
     }))
     .sort((a, b) => {
       if (a.date && b.date) {
@@ -72,4 +61,34 @@ export function sortPages(
       return a.title.localeCompare(b.title, locale, { numeric: true })
     })
     .map(item => [item.name, item.title])
+}
+
+export function isSerializable(o: any): boolean {
+  try {
+    JSON.stringify(o)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Calculate a 32 bit FNV-1a hash
+ * Found here: https://gist.github.com/vaiorabbit/5657561
+ * Ref.: http://isthe.com/chongo/tech/comp/fnv/
+ *
+ * @param {string} str the input value
+ * @param {number} [seed] optionally pass the hash of the previous chunk
+ * @returns {string}
+ */
+export function hashFnv32a(str: string, seed = 0x811c9dc5): string {
+  let hval = seed
+
+  for (let i = 0; i < str.length; i++) {
+    hval ^= str.charCodeAt(i)
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24)
+  }
+
+  // Convert to 8 digit hex string
+  return ('0000000' + (hval >>> 0).toString(16)).substring(-8)
 }

@@ -1,5 +1,99 @@
 # nextra
 
+## 2.2.6
+
+### Patch Changes
+
+- be24334: improve search index generation
+- 4fc13df: fix warning of dynamic imports
+
+## 2.2.5
+
+### Patch Changes
+
+- 163065c: loader refactor, type-safe `__nextra_resolvePageMap`, avoid code interpolation in loader.ts
+
+## 2.2.4
+
+### Patch Changes
+
+- 091b77b: fix missing filename
+
+  add filename / copy code with "codeHighlight: false"
+
+  add unit tests for filename and copy code
+
+- 917de49: remove `github-slugger` from docs
+
+## 2.2.3
+
+### Patch Changes
+
+- 11b2870: fix copy code button position
+
+## 2.2.2
+
+### Patch Changes
+
+- 3145f53: extend `plugin:react/recommended`, `plugin:react-hooks/recommended` and `plugin:@next/next/recommended` configs
+- 1834730: fix hydration error produced by cached compiler, fix broken code-blocks styles while setting `nextraConfig.codeHighlight: false`
+- f53b935: Allow disabling code highlighting & memory improvements
+
+## 2.2.1
+
+### Patch Changes
+
+- 9bcfc1d: fix error was swallowed silently
+
+## 2.2.0
+
+### Minor Changes
+
+- e4b20ca: support `transform` in nextra config
+
+### Patch Changes
+
+- 52a1bf3: feat: allow to use plain md syntax
+- af76dbe: fix highlight substring from filename for code blocks
+
+## 2.1.0
+
+### Minor Changes
+
+- e5262d0: improve hmr and internal api for layout (toc and meta files)
+
+### Patch Changes
+
+- a923bd5: fix `collectFiles` concurrency
+- 5bdc62c: fix static images on windows
+- c86508c: lint fixes for `eslint:recommended` and `plugin:@typescript-eslint/recommended` configs
+- d6c871a: simplify the custom theme layout api
+- 1ff43c1: use OKLCH colors where possible
+- a31678a: improve copy
+
+## 2.0.3
+
+### Patch Changes
+
+- adb2d25: fix remote mdx
+- 8060ed3: style improvements
+
+## 2.0.2
+
+### Patch Changes
+
+- 1e2afcf: Add LaTeX support
+- 99ec64e: fix indentation for copy code button
+- 3a08fe2: Add Callout border in dark mode
+- f488e2e: remove @react/skip-nev #1051
+
+  fix: staticImage should only set blur placeholder for jpeg,png,webp,avif
+
+- cf9b886: better performance of `collectFiles`
+- f35e724: update shiki to v0.12.1
+- b2fc168: support `nextConfig.distDir`
+- cc1cb5f: support `nextConfig.basePath` with i18n
+
 ## 2.0.1
 
 ### Patch Changes

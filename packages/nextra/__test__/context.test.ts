@@ -5,8 +5,9 @@ import {
   getPagesUnderRoute
 } from '../src/context'
 import { collectFiles } from '../src/plugin'
-import { CWD } from '../src/constants'
+import { CWD, NEXTRA_INTERNAL } from '../src/constants'
 import path from 'node:path'
+import { NextraInternalGlobal } from '../src/types'
 
 describe('context', () => {
   beforeAll(async () => {
@@ -18,11 +19,15 @@ describe('context', () => {
       'swr-site',
       'pages'
     )
-    const { items } = await collectFiles(PAGES_DIR)
-    globalThis.__nextra_internal__ = {
+    const { items } = await collectFiles(PAGES_DIR, [''])
+    // @ts-expect-error -- we don't care about missing properties
+    const __nextra_internal__ = ((globalThis as NextraInternalGlobal)[
+      NEXTRA_INTERNAL
+    ] ||= {})
+    Object.assign(__nextra_internal__, {
       pageMap: items,
       route: '/docs'
-    }
+    })
   })
 
   describe('getAllPages()', () => {
