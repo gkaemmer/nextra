@@ -1,28 +1,34 @@
-import { createProcessor, ProcessorOptions } from '@mdx-js/mdx'
-import { Processor } from '@mdx-js/mdx/lib/core'
+import path from 'node:path'
+import { createRequire } from 'node:module'
+import type { ProcessorOptions } from '@mdx-js/mdx';
+import { createProcessor } from '@mdx-js/mdx'
+import type { Processor } from '@mdx-js/mdx/lib/core'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
-import readingTime from 'remark-reading-time'
+import remarkReadingTime from 'remark-reading-time'
 import grayMatter from 'gray-matter'
 
 import {
   remarkStaticImage,
   remarkHeadings,
+  remarkReplaceImports,
   structurize,
   parseMeta,
-  attachMeta
+  attachMeta,
+  remarkRemoveImports
 } from './mdx-plugins'
-import { LoaderOptions, PageOpts, ReadingTime } from './types'
+import type { LoaderOptions, PageOpts, ReadingTime } from './types'
 import theme from './theme.json'
 import { truthy } from './utils'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import { CODE_BLOCK_FILENAME_REGEX, DEFAULT_LOCALE } from './constants'
+import { CODE_BLOCK_FILENAME_REGEX, CWD, DEFAULT_LOCALE } from './constants'
 
 globalThis.__nextra_temp_do_not_use = () => {
-  // @ts-expect-error -- ignore error - File is not a module
   import('./__temp__')
 }
+
+const require = createRequire(import.meta.url)
 
 const DEFAULT_REHYPE_PRETTY_CODE_OPTIONS = {
   theme,
@@ -62,8 +68,7 @@ export async function compileMdx(
     | 'latex'
     | 'codeHighlight'
   > & { mdxOptions?: MdxOptions; route?: string; locale?: string } = {},
-  filePath = '',
-  useCachedCompiler = false
+  { filePath = '', useCachedCompiler = false, isPageImport = true } = {}
 ) {
   // Extract frontMatter information if it exists
   const { data: frontMatter, content } = grayMatter(source)
@@ -90,7 +95,7 @@ export async function compileMdx(
 
   const {
     jsx = false,
-    format = 'mdx',
+    format: _format = 'mdx',
     outputFormat = 'function-body',
     remarkPlugins = [],
     rehypePlugins = [],
@@ -98,8 +103,24 @@ export async function compileMdx(
   }: MdxOptions = {
     ...loaderOptions.mdxOptions,
     // You can override MDX options in the frontMatter too.
-    ...(frontMatter.mdxOptions as Record<string, unknown>)
+    ...frontMatter.mdxOptions
   }
+
+  const format =
+    _format === 'detect' ? (filePath.endsWith('.mdx') ? 'mdx' : 'md') : _format
+
+  const {
+    staticImage,
+    flexsearch,
+    readingTime,
+    latex,
+    codeHighlight,
+    defaultShowCopyCode
+  } = loaderOptions
+
+  // https://github.com/shuding/nextra/issues/1303
+  const isFileOutsideCWD =
+    !isPageImport && path.relative(CWD, filePath).startsWith('..')
 
   const compiler =
     (useCachedCompiler && cachedCompilerForFormat[format]) ||
@@ -107,23 +128,24 @@ export async function compileMdx(
       jsx,
       format,
       outputFormat,
-      providerImportSource: 'nextra/mdx',
-      // https://github.com/hashicorp/next-mdx-remote/issues/307#issuecomment-1363415249
-      development: false,
+      providerImportSource: isFileOutsideCWD
+        ? require.resolve('nextra').replace(/index\.js$/, 'mdx.mjs') // fixes Package subpath './mdx' is not defined by "exports"
+        : 'nextra/mdx',
       remarkPlugins: [
         ...remarkPlugins,
+        outputFormat === 'function-body' && remarkRemoveImports,
         remarkGfm,
         remarkHeadings,
-        loaderOptions.staticImage && remarkStaticImage,
-        searchIndexKey !== null &&
-          structurize(structurizedData, loaderOptions.flexsearch),
-        loaderOptions.readingTime && readingTime,
-        loaderOptions.latex && remarkMath
+        staticImage && remarkStaticImage,
+        searchIndexKey !== null && structurize(structurizedData, flexsearch),
+        readingTime && remarkReadingTime,
+        latex && remarkMath,
+        isFileOutsideCWD && remarkReplaceImports
       ].filter(truthy),
       rehypePlugins: [
         ...rehypePlugins,
-        [parseMeta, { defaultShowCopyCode: loaderOptions.defaultShowCopyCode }],
-        loaderOptions.codeHighlight &&
+        [parseMeta, { defaultShowCopyCode }],
+        codeHighlight !== false &&
           ([
             rehypePrettyCode,
             {
@@ -132,7 +154,7 @@ export async function compileMdx(
             }
           ] as any),
         attachMeta,
-        loaderOptions.latex && rehypeKatex
+        latex && rehypeKatex
       ].filter(truthy)
     }))
 
@@ -149,7 +171,8 @@ export async function compileMdx(
     const readingTime = vFile.data.readingTime as ReadingTime | undefined
 
     return {
-      result: String(vFile).replace('export default MDXContent;', ''),
+      // https://github.com/shuding/nextra/issues/1032
+      result: String(vFile).replaceAll('__esModule', '_\\_esModule'),
       ...headingMeta,
       ...(readingTime && { readingTime }),
       structurizedData,

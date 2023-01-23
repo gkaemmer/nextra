@@ -1,27 +1,26 @@
-import { NextConfig } from 'next'
-import { Heading as MDASTHeading } from 'mdast'
-import { ProcessorOptions } from '@mdx-js/mdx'
-import { Options as RehypePrettyCodeOptions } from 'rehype-pretty-code'
-import { GrayMatterFile } from 'gray-matter'
-import { PageMapCache } from './plugin'
-import {
+import type { NextConfig } from 'next'
+import type { Heading as MDASTHeading } from 'mdast'
+import type { ProcessorOptions } from '@mdx-js/mdx'
+import type { Options as RehypePrettyCodeOptions } from 'rehype-pretty-code'
+import type { GrayMatterFile } from 'gray-matter'
+import type { PageMapCache } from './plugin'
+import type {
   MARKDOWN_EXTENSIONS,
   META_FILENAME,
   NEXTRA_INTERNAL
 } from './constants'
-import { ReactNode, FC } from 'react'
+import type { ReactNode, FC } from 'react'
 
 type MetaFilename = typeof META_FILENAME
 type MarkdownExtension = (typeof MARKDOWN_EXTENSIONS)[number]
 
 export interface LoaderOptions extends NextraConfig {
-  metaImport?: boolean
-  pageImport?: boolean
+  isMetaImport?: boolean
+  isPageImport?: boolean
   locales: string[]
   defaultLocale: string
   pageMapCache: PageMapCache
   newNextLinkBehavior?: boolean
-  distDir?: string
 }
 
 export interface Folder<FileType = PageMapItem> {
@@ -41,15 +40,31 @@ export type MetaJsonFile = {
   __nextra_src?: string
 }
 
+export type DynamicFolder = {
+  type: 'folder'
+  items: DynamicMeta
+  title?: string
+}
+
+export type DynamicMetaItem = Meta | DynamicFolder
+
+export type DynamicMeta = Record<string, DynamicMetaItem>
+
+export type DynamicMetaJsonFile = {
+  kind: 'Meta'
+  locale?: string
+  data: DynamicMeta
+}
+
 export type FrontMatter = GrayMatterFile<string>['data']
 export type Meta = string | Record<string, any>
 
-export type MdxFile = {
+export type MdxFile<FrontMatterType = FrontMatter> = {
   kind: 'MdxPage'
   name: string
   route: string
   locale?: string
-  frontMatter?: FrontMatter
+  frontMatter?: FrontMatterType
 }
 
 export type MetaJsonPath = `${string}/${MetaFilename}`
@@ -72,10 +87,10 @@ export type Heading = Omit<MDASTHeading, 'type' | 'children' | 'position'> & {
   id: string
 }
 
-export type PageOpts = {
+export type PageOpts<FrontMatterType = FrontMatter> = {
   filePath: string
   route: string
-  frontMatter: FrontMatter
+  frontMatter: FrontMatterType
   pageMap: PageMapItem[]
   title: string
   headings: Heading[]
@@ -130,11 +145,18 @@ export type NextraConfig = {
   readingTime?: boolean
   latex?: boolean
   codeHighlight?: boolean
+  /**
+   * A function to modify the code of compiled MDX pages.
+   * @experimental
+   */
   transform?: Transform
-  mdxOptions?: Pick<
-    ProcessorOptions,
-    'rehypePlugins' | 'remarkPlugins' | 'format'
-  > & {
+  /**
+   * A function to modify the `pageOpts` prop passed to theme layouts.
+   * @experimental
+   */
+  transformPageOpts?: (pageOpts: PageOpts) => PageOpts
+  mdxOptions?: Pick<ProcessorOptions, 'rehypePlugins' | 'remarkPlugins'> & {
+    format?: 'detect' | 'mdx' | 'md'
     rehypePrettyCodeOptions?: Partial<RehypePrettyCodeOptions>
   }
 }

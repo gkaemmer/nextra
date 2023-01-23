@@ -1,4 +1,5 @@
-import { useRef, useEffect, ReactElement, ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react';
+import { useRef, useEffect } from 'react'
 import cn from 'clsx'
 
 export function Collapse({
@@ -16,6 +17,7 @@ export function Collapse({
   const innerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef(0)
   const initialOpen = useRef(isOpen)
+  const initialRender = useRef(true)
 
   useEffect(() => {
     const container = containerRef.current
@@ -24,7 +26,7 @@ export function Collapse({
     if (animation) {
       clearTimeout(animation)
     }
-    if (!container || !inner) return
+    if (initialRender.current || !container || !inner) return
 
     container.classList.toggle('nx-duration-500', !isOpen)
     container.classList.toggle('nx-duration-300', isOpen)
@@ -53,6 +55,10 @@ export function Collapse({
     }
   }, [horizontal, isOpen])
 
+  useEffect(() => {
+    initialRender.current = false
+  }, [])
+
   return (
     <div
       ref={containerRef}
@@ -62,7 +68,7 @@ export function Collapse({
       <div
         ref={innerRef}
         className={cn(
-          'nx-p-2 nx-transition-opacity nx-duration-500 nx-ease-in-out motion-reduce:nx-transition-none',
+          'nx-transition-opacity nx-duration-500 nx-ease-in-out motion-reduce:nx-transition-none',
           isOpen ? 'nx-opacity-100' : 'nx-opacity-0',
           className
         )}

@@ -1,4 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server'
 import { removeBasePath } from 'next/dist/client/remove-base-path'
 import { addBasePath } from 'next/dist/client/add-base-path'
 import { addLocale } from 'next/dist/client/add-locale'
@@ -37,7 +38,7 @@ export function locales(request: NextRequest) {
 
   const shouldHandleLocale =
     !/^\/(api|_next)\//.test(nextUrl.pathname) &&
-    !/\.(jpe?g|svg|png|webmanifest)$/.test(nextUrl.pathname) &&
+    !/\.(jpe?g|svg|png|webmanifest|xml)$/.test(nextUrl.pathname) &&
     nextUrl.locale !== '' &&
     // not Server-Side Error page
     nextUrl.pathname !== '/500'

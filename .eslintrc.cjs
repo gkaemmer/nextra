@@ -18,7 +18,12 @@ module.exports = {
     // Rules for all files
     {
       files: '**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts}',
-      extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+      extends: [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:import/typescript'
+      ],
+      plugins: ['import'],
       rules: {
         'prefer-object-has-own': 'error',
         'logical-assignment-operators': [
@@ -29,9 +34,16 @@ module.exports = {
         '@typescript-eslint/prefer-optional-chain': 'error',
         'no-else-return': ['error', { allowElseIf: false }],
         'no-lonely-if': 'error',
+        'prefer-destructuring': [
+          'error',
+          { VariableDeclarator: { object: true } }
+        ],
+        'import/no-duplicates': 'error',
         // todo: enable
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-non-null-assertion': 'off'
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off'
       }
     },
     // Rules for React files
@@ -56,6 +68,12 @@ module.exports = {
               'CallExpression[callee.name=useMemo][arguments.1.type=ArrayExpression][arguments.1.elements.length=0]',
             message:
               "`useMemo` with an empty dependency array can't provide a stable reference, use `useRef` instead."
+          },
+          {
+            // ❌ z.object(…)
+            selector:
+              'MemberExpression[object.name=z] > .property[name=object]',
+            message: 'Use z.strictObject is more safe.'
           }
         ],
         'react/jsx-filename-extension': [
@@ -84,7 +102,8 @@ module.exports = {
         ]
       },
       rules: {
-        '@typescript-eslint/no-unnecessary-type-assertion': 'error'
+        '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error'
       }
     },
     // ⚙️ nextra-theme-docs

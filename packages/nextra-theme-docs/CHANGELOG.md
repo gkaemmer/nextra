@@ -1,5 +1,61 @@
 # nextra-theme-docs
 
+## 2.2.13
+
+### Patch Changes
+
+- 089112c: validate `_meta.json` files with zod
+- 23fc5b7: style improvements
+- d1d873f: typed frontmatter -> `useConfig<YOUR_FRONTMATTER_TYPE>`
+- 93b9596: fix overflow for main content on desktop and mobile
+- 6626356: prefer `import type`
+- 2234a13: fix raw `__esModule` string ☠️
+- Updated dependencies [d1d873f]
+- Updated dependencies [6626356]
+- Updated dependencies [2234a13]
+  - nextra@2.2.13
+
+## 2.2.12
+
+### Patch Changes
+
+- c913ec8: add peer deps
+- Updated dependencies [619ae3a]
+  - nextra@2.2.12
+
+## 2.2.11
+
+### Patch Changes
+
+- bcaf84a: fix treeshake of zod validation on prod build
+- e10bf74: add support for remote `[...catchAll]` routes
+
+  support meta keys with `/`
+
+  sanitize remote mdx by removing `import` statements
+
+- 6a0f428: add zod validation for \_meta.json "theme" property
+- 6a0f428: use `z.strictObject` instead `z.object` in zod theme validation, improve zod error messages
+
+## 2.2.10
+
+### Patch Changes
+
+- c97143f: fix search index output location
+- 4b2052f: fix `Module not found: Can't resolve 'nextra-theme-docs/style.css'` for imported markdown files that located outside of CWD
+- 624d6b4: fix when sidebar show non-md folders
+- 0c957db: fix capitalizing of undefined \_meta.json file/folders
+
+## 2.2.9
+
+## 2.2.8
+
+## 2.2.7
+
+### Patch Changes
+
+- be410bd: fix `<Collapse />` initial animation
+
 ## 2.2.6
 
 ## 2.2.5

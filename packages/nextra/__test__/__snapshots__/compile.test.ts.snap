@@ -1,6 +1,6 @@
 // Vitest Snapshot v1
 
-exports[`process heading > code-h1 1`] = `
+exports[`Process heading > code-h1 1`] = `
 {
   "frontMatter": {},
   "headings": [
@@ -23,7 +23,7 @@ function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);
   return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
-
+export default MDXContent;
 ",
   "searchIndexKey": null,
   "structurizedData": {},
@@ -31,7 +31,7 @@ function MDXContent(props = {}) {
 }
 `;
 
-exports[`process heading > code-with-text-h1 1`] = `
+exports[`Process heading > code-with-text-h1 1`] = `
 {
   "frontMatter": {},
   "headings": [
@@ -54,7 +54,7 @@ function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);
   return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
-
+export default MDXContent;
 ",
   "searchIndexKey": null,
   "structurizedData": {},
@@ -62,7 +62,7 @@ function MDXContent(props = {}) {
 }
 `;
 
-exports[`process heading > dynamic-h1 1`] = `
+exports[`Process heading > dynamic-h1 1`] = `
 {
   "frontMatter": {},
   "hasJsxInH1": true,
@@ -90,7 +90,7 @@ function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);
   return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
-
+export default MDXContent;
 ",
   "searchIndexKey": null,
   "structurizedData": {},
@@ -98,7 +98,7 @@ function MDXContent(props = {}) {
 }
 `;
 
-exports[`process heading > no-h1 1`] = `
+exports[`Process heading > no-h1 1`] = `
 {
   "frontMatter": {},
   "headings": [
@@ -120,14 +120,14 @@ function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);
   return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
-
+export default MDXContent;
 ",
   "searchIndexKey": null,
   "structurizedData": {},
 }
 `;
 
-exports[`process heading > static-h1 1`] = `
+exports[`Process heading > static-h1 1`] = `
 {
   "frontMatter": {},
   "headings": [
@@ -149,7 +149,7 @@ function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);
   return MDXLayout ? <MDXLayout {...props}><_createMdxContent {...props} /></MDXLayout> : _createMdxContent(props);
 }
-
+export default MDXContent;
 ",
   "searchIndexKey": null,
   "structurizedData": {},

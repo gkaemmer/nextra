@@ -1,12 +1,12 @@
-import { ReactElement, ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import cn from 'clsx'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
-import { ArrowRightIcon } from 'nextra/icons'
+import { ArrowRightIcon, MenuIcon } from 'nextra/icons'
 
 import { useConfig, useMenu } from '../contexts'
-import { MenuIcon } from 'nextra/icons'
-import { Item, PageItem, MenuItem, renderComponent, getFSRoute } from '../utils'
+import type { Item, PageItem, MenuItem} from '../utils';
+import { renderComponent, getFSRoute } from '../utils'
 import { Anchor } from './anchor'
 import { DEFAULT_LOCALE } from '../constants'
 
@@ -57,7 +57,7 @@ function NavbarMenu({
           leaveTo="nx-opacity-0"
         >
           <Menu.Items
-            className="nx-absolute nx-right-0 nx-z-20 nx-mt-1 nx-max-h-64 nx-min-w-full nx-overflow-auto nx-rounded-md nx-border nx-border-black/5 nx-bg-white nx-py-1 nx-text-sm nx-shadow-lg dark:nx-border-white/10 dark:nx-bg-neutral-800"
+            className="nx-absolute nx-right-0 nx-z-20 nx-mt-1 nx-max-h-64 nx-min-w-full nx-overflow-auto nx-rounded-md nx-ring-1 nx-ring-black/5 nx-bg-white nx-py-1 nx-text-sm nx-shadow-lg dark:nx-ring-white/20 dark:nx-bg-neutral-800"
             tabIndex={0}
           >
             {Object.entries(items || {}).map(([key, item]) => (
