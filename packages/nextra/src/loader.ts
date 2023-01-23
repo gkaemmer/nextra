@@ -55,8 +55,8 @@ async function loader(
   source: string
 ): Promise<string> {
   const {
-    metaImport,
-    pageImport,
+    isMetaImport = false,
+    isPageImport = false,
     theme,
     themeConfig,
     locales,
@@ -70,19 +70,15 @@ async function loader(
     pageMapCache,
     newNextLinkBehavior,
     transform,
+    transformPageOpts,
     codeHighlight
   } = context.getOptions()
 
   context.cacheable(true)
 
   // _meta.js used as a page.
-  if (metaImport) {
+  if (isMetaImport) {
     return 'export default () => null'
-  }
-
-  // Check if there's a theme provided
-  if (!theme) {
-    throw new Error('No Nextra theme found!')
   }
 
   const mdxPath = context.resourcePath as MdxPath
@@ -153,7 +149,8 @@ async function loader(
       mdxOptions: {
         ...mdxOptions,
         jsx: true,
-        outputFormat: 'program'
+        outputFormat: 'program',
+        format: 'detect'
       },
       readingTime: _readingTime,
       defaultShowCopyCode,
@@ -164,22 +161,16 @@ async function loader(
       route: pageNextRoute,
       locale
     },
-    mdxPath,
-    false // TODO: produce hydration errors or error - Create a new processor first, by calling it: use `processor()` instead of `processor`.
+    {
+      filePath: mdxPath,
+      useCachedCompiler: false, // TODO: produce hydration errors or error - Create a new processor first, by calling it: use `processor()` instead of `processor`.
+      isPageImport
+    }
   )
-
-  const katexCssImport = latex ? "import 'katex/dist/katex.min.css'" : ''
-  const cssImport = OFFICIAL_THEMES.includes(
-    theme as (typeof OFFICIAL_THEMES)[number]
-  )
-    ? `import '${theme}/style.css'`
-    : ''
 
   // Imported as a normal component, no need to add the layout.
-  if (!pageImport) {
-    return `${cssImport}
-${result}
-export default MDXContent`
+  if (!isPageImport) {
+    return result
   }
 
   const { route, pageMap, dynamicMetaItems } = resolvePageMap({
@@ -199,7 +190,7 @@ export default MDXContent`
   if (searchIndexKey) {
     if (frontMatter.searchable !== false) {
       // Store all the things in buildInfo.
-      const buildInfo = (context._module as any).buildInfo
+      const { buildInfo } = context._module as any
       buildInfo.nextraSearch = {
         indexKey: searchIndexKey,
         title: fallbackTitle,
@@ -224,11 +215,7 @@ export default MDXContent`
   // Relative path instead of a package name
   const layout = isLocalTheme ? path.resolve(theme) : theme
 
-  const themeConfigImport = themeConfig
-    ? `import __nextra_themeConfig from '${slash(path.resolve(themeConfig))}'`
-    : ''
-
-  const pageOpts: PageOpts = {
+  let pageOpts: PageOpts = {
     filePath: slash(path.relative(CWD, mdxPath)),
     route,
     frontMatter,
@@ -241,11 +228,24 @@ export default MDXContent`
     readingTime,
     title: fallbackTitle
   }
+  if (transformPageOpts) {
+    // It is possible that a theme wants to attach customized data, or modify
+    // some fields of `pageOpts`. One example is that the theme doesn't need
+    // to access the full pageMap or frontMatter of other pages, and it's not
+    // necessary to include them in the bundle.
+    pageOpts = transformPageOpts(pageOpts)
+  }
 
+  const themeConfigImport = themeConfig
+    ? `import __nextra_themeConfig from '${slash(path.resolve(themeConfig))}'`
+    : ''
+  const katexCssImport = latex ? "import 'katex/dist/katex.min.css'" : ''
+  const cssImport = OFFICIAL_THEMES.includes(theme)
+    ? `import '${theme}/style.css'`
+    : ''
   const finalResult = transform
     ? await transform(result, { route: pageNextRoute })
     : result
-
   const stringifiedPageOpts = JSON.stringify(pageOpts)
 
   return `import { setupNextraPage } from 'nextra/setup-page'
@@ -254,27 +254,32 @@ ${themeConfigImport}
 ${katexCssImport}
 ${cssImport}
 
-${finalResult}
+${finalResult.replace(
+  'export default MDXContent;',
+  "export { default } from 'nextra/layout'"
+)}
 
 setupNextraPage({
-  pageNextRoute: ${JSON.stringify(pageNextRoute)},
-  pageOpts: ${stringifiedPageOpts},
-  nextraLayout: __nextra_layout,
-  themeConfig: ${themeConfigImport ? '__nextra_themeConfig' : 'null'},
   Content: MDXContent,
+  nextraLayout: __nextra_layout,
   hot: module.hot,
-  pageOptsChecksum: ${JSON.stringify(hashFnv32a(stringifiedPageOpts))},
-  dynamicMetaModules: typeof window !== 'undefined' ? [] : [${dynamicMetaItems
+  pageOpts: ${stringifiedPageOpts},
+  themeConfig: ${themeConfigImport ? '__nextra_themeConfig' : 'null'},
+  pageNextRoute: ${JSON.stringify(pageNextRoute)},
+  pageOptsChecksum: ${
+    IS_PRODUCTION
+      ? 'undefined'
+      : JSON.stringify(hashFnv32a(stringifiedPageOpts))
+  },
+  dynamicMetaModules: typeof window === 'undefined' ? [${dynamicMetaItems
     .map(
       descriptor =>
         `[import(${JSON.stringify(descriptor.metaFilePath)}), ${JSON.stringify(
           descriptor
         )}]`
     )
-    .join(',')}]
-})
-
-export { default } from 'nextra/layout'`
+    .join(',')}] : []
+})`
 }
 
 export default function syncLoader(

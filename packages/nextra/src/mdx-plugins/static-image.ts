@@ -1,6 +1,6 @@
 import { visit } from 'unist-util-visit'
-import { Plugin } from 'unified'
-import { Root } from 'mdast'
+import type { Plugin } from 'unified'
+import type { Root } from 'mdast'
 import path from 'node:path'
 import slash from 'slash'
 import { truthy } from '../utils'
@@ -47,7 +47,8 @@ export const remarkStaticImage: Plugin<[{ filePath: string }], Root> =
     const importsToInject: any[] = []
 
     visit(tree, 'image', node => {
-      let { url } = node
+      // https://github.com/shuding/nextra/issues/1344
+      let url = decodeURI(node.url)
       if (!url) {
         return
       }

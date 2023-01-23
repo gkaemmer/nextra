@@ -60,6 +60,11 @@ const nextra = (themeOrNextraConfig, themeConfig) =>
       newNextLinkBehavior: nextConfig.experimental?.newNextLinkBehavior
     }
 
+    // Check if there's a theme provided
+    if (!nextraLoaderOptions.theme) {
+      throw new Error('No Nextra theme found!')
+    }
+
     return {
       ...nextConfig,
       rewrites,
@@ -82,8 +87,10 @@ const nextra = (themeOrNextraConfig, themeConfig) =>
           {
             // Match Markdown imports from non-pages. These imports have an
             // issuer, which can be anything as long as it's not empty.
+            // When the issuer is null, it means that it can be imported via a
+            // runtime import call such as `import('...')`.
             test: MARKDOWN_EXTENSION_REGEX,
-            issuer: request => !!request,
+            issuer: request => !!request || request === null,
             use: [
               options.defaultLoaders.babel,
               {
@@ -93,16 +100,16 @@ const nextra = (themeOrNextraConfig, themeConfig) =>
             ]
           },
           {
-            // Match pages (imports without an issuer).
+            // Match pages (imports without an issuer request).
             test: MARKDOWN_EXTENSION_REGEX,
-            issuer: request => !request,
+            issuer: request => request === '',
             use: [
               options.defaultLoaders.babel,
               {
                 loader: 'nextra/loader',
                 options: {
                   ...nextraLoaderOptions,
-                  pageImport: true
+                  isPageImport: true
                 }
               }
             ]
@@ -116,7 +123,7 @@ const nextra = (themeOrNextraConfig, themeConfig) =>
               {
                 loader: 'nextra/loader',
                 options: {
-                  metaImport: true
+                  isMetaImport: true
                 }
               }
             ]

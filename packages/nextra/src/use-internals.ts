@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router.js'
 import { useEffect, useState } from 'react'
 
-import { IS_PRODUCTION, NEXTRA_INTERNAL } from './constants'
-import { NextraInternalGlobal } from './types'
+import { NEXTRA_INTERNAL } from './constants'
+import type { NextraInternalGlobal } from './types'
 
 /**
  * This hook is used to access the internal state of Nextra, you should never
@@ -15,19 +15,24 @@ export function useInternals() {
   const { route } = useRouter()
   const rerender = useState({})[1]
 
-  useEffect(() => {
-    if (IS_PRODUCTION) return
-    const trigger = () => rerender({})
+  // The HMR handling logic is not needed for production builds, the condition
+  // should be removed after compilation and it's fine to put the effect under
+  // if, because hooks' order is still stable.
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const trigger = () => rerender({})
 
-    const listeners = __nextra_internal__.refreshListeners
+      const listeners = __nextra_internal__.refreshListeners
 
-    listeners[route] ||= []
-    listeners[route].push(trigger)
+      listeners[route] ||= []
+      listeners[route].push(trigger)
 
-    return () => {
-      listeners[route].splice(listeners[route].indexOf(trigger), 1)
-    }
-  }, [route, __nextra_internal__.refreshListeners, rerender])
+      return () => {
+        listeners[route].splice(listeners[route].indexOf(trigger), 1)
+      }
+    }, [route, __nextra_internal__.refreshListeners, rerender])
+  }
 
   const context = __nextra_internal__.context[route]
 

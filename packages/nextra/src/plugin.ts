@@ -1,5 +1,5 @@
 import type { Compiler } from 'webpack'
-import {
+import type {
   NextraConfig,
   FileMap,
   MdxPath,
@@ -11,9 +11,14 @@ import {
 } from './types'
 import fs from 'graceful-fs'
 import { promisify } from 'node:util'
-import { isSerializable, parseFileName, sortPages, truthy } from './utils'
+import {
+  isSerializable,
+  normalizePageRoute,
+  parseFileName,
+  sortPages,
+  truthy
+} from './utils'
 import path from 'node:path'
-import slash from 'slash'
 import grayMatter from 'gray-matter'
 import pLimit from 'p-limit'
 
@@ -62,7 +67,7 @@ export async function collectFiles(
       ? // directory couldn't have extensions
         { name: path.basename(filePath), locale: '', ext: '' }
       : parseFileName(filePath)
-    const fileRoute = slash(path.join(route, name.replace(/^index$/, '')))
+    const fileRoute = normalizePageRoute(route, name)
 
     if (isDirectory) {
       if (fileRoute === '/api') return
@@ -152,15 +157,11 @@ export async function collectFiles(
 
   const items = (await Promise.all(promises)).filter(truthy)
 
-  const mdxPagesAndFolders: (MdxFile | Folder)[] = []
   const mdxPages: MdxFile[] = []
   const metaLocaleIndexes = new Map<string, number>()
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
-    if (item.kind === 'MdxPage' || item.kind === 'Folder') {
-      mdxPagesAndFolders.push(item)
-    }
     if (item.kind === 'MdxPage') {
       mdxPages.push(item)
     }
@@ -183,23 +184,16 @@ export async function collectFiles(
 
     const metaPath = path.join(dir, metaFilename) as MetaJsonPath
 
-    if (metaIndex === undefined) {
-      // Create a new meta file if it doesn't exist.
-      fileMap[metaPath] = {
-        kind: 'Meta',
-        ...(locale && { locale }),
-        data: Object.fromEntries(defaultMeta)
-      }
-      items.push(fileMap[metaPath])
-    } else {
+    if (metaIndex !== undefined) {
       // Fill with the fallback. Note that we need to keep the original order.
       const meta = { ...(items[metaIndex] as MetaJsonFile) }
-      for (const [k, v] of defaultMeta) {
-        if (meta.data[k] === undefined) {
-          meta.data[k] = v
+      for (const [key, value] of defaultMeta) {
+        meta.data[key] ||= value;
+        const metaItem = meta.data[key]
+        if (typeof metaItem === 'object') {
+          metaItem.title ||= value
         }
       }
-
       fileMap[metaPath] = meta
       items[metaIndex] = meta
     }

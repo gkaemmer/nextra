@@ -1,5 +1,66 @@
 # nextra
 
+## 2.2.13
+
+### Patch Changes
+
+- d1d873f: typed frontmatter -> `useConfig<YOUR_FRONTMATTER_TYPE>`
+- 6626356: prefer `import type`
+- 2234a13: fix raw `__esModule` string ☠️
+
+## 2.2.12
+
+### Patch Changes
+
+- 619ae3a: fix pageMap for remote content
+
+## 2.2.11
+
+### Patch Changes
+
+- 7d96698: compile mdx with `format: 'detect'` in loader
+- e10bf74: add support for remote `[...catchAll]` routes
+
+  support meta keys with `/`
+
+  sanitize remote mdx by removing `import` statements
+
+- e04e2ce: better types for dynamic meta
+- 5fd2183: ignore `.xml` files in locales middleware
+- e38e61f: use decodeURI in static-image.ts
+
+## 2.2.10
+
+### Patch Changes
+
+- c97143f: fix search index output location
+- 256282a: fix codeHighlight being false by default for remote contet
+- 4d3c20a: fix special modules being bundled in client
+- 4b2052f: fix `Module not found: Can't resolve 'nextra-theme-docs/style.css'` for imported markdown files that located outside of CWD
+- 624d6b4: fix when sidebar show non-md folders
+- 0c957db: fix capitalizing of undefined \_meta.json file/folders
+- d0b9249: fix subpath import failed
+
+## 2.2.9
+
+### Patch Changes
+
+- c50474e: support dynamic markdown import
+
+## 2.2.8
+
+### Patch Changes
+
+- d2ed10f: remove development: false
+- b943146: add transformPageOpts option for advanced use cases
+
+## 2.2.7
+
+### Patch Changes
+
+- 36fd8c7: add format detection
+- 64cec8f: disable code splitting and fix dev errors
+
 ## 2.2.6
 
 ### Patch Changes

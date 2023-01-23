@@ -1,8 +1,9 @@
+import type {
+  ReactElement} from 'react';
 import {
   useState,
   useEffect,
   useMemo,
-  ReactElement,
   memo,
   useRef,
   createContext,
@@ -10,11 +11,12 @@ import {
 } from 'react'
 import cn from 'clsx'
 import { useRouter } from 'next/router'
-import { Heading } from 'nextra'
+import type { Heading } from 'nextra'
 import scrollIntoView from 'scroll-into-view-if-needed'
 
 import { useConfig, useMenu, useActiveAnchor } from '../contexts'
-import { Item, MenuItem, PageItem, getFSRoute, renderComponent } from '../utils'
+import type { Item, MenuItem, PageItem} from '../utils';
+import { getFSRoute, renderComponent } from '../utils'
 import { LocaleSwitch } from './locale-switch'
 import { ThemeSwitch } from './theme-switch'
 import { ArrowRightIcon, ExpandIcon } from 'nextra/icons'
@@ -175,7 +177,7 @@ function FolderImpl({ item, anchors }: FolderProps): ReactElement {
       <Collapse className="ltr:nx-pr-0 rtl:nx-pl-0" isOpen={open}>
         {Array.isArray(item.children) ? (
           <Menu
-            className={cn(classes.border, 'ltr:nx-ml-1 rtl:nx-mr-1')}
+            className={cn(classes.border, 'ltr:nx-ml-3 rtl:nx-mr-3')}
             directories={item.children}
             base={item.route}
             anchors={anchors}
@@ -336,6 +338,7 @@ export function Sidebar({
   const router = useRouter()
   const [focused, setFocused] = useState<null | string>(null)
   const [showSidebar, setSidebar] = useState(true)
+  const [showToggleAnimation, setToggleAnimation] = useState(false)
 
   const anchors = useMemo(() => headings.filter(v => v.depth === 2), [headings])
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -423,7 +426,7 @@ export function Sidebar({
               className={cn(
                 'nx-overflow-y-auto nx-p-4',
                 'nx-grow md:nx-h-[calc(100vh-var(--nextra-navbar-height)-3.75rem)]',
-                showSidebar ? 'nextra-scrollbar' : 'no-scrollbar'
+                showSidebar ? 'nextra-scrollbar nx-pr-2' : 'no-scrollbar'
               )}
               ref={sidebarRef}
             >
@@ -457,20 +460,23 @@ export function Sidebar({
             className={cn(
               'nx-sticky nx-bottom-0',
               'nx-bg-white dark:nx-bg-dark', // when banner is showed, sidebar links can be behind menu, set bg color as body bg color
-              'nx-mx-4 nx-border-t nx-py-4 nx-shadow-[0_-12px_16px_#fff]',
+              'nx-mx-4 nx-py-4 nx-shadow-[0_-12px_16px_#fff]',
               'nx-flex nx-items-center nx-gap-2',
               'dark:nx-border-neutral-800 dark:nx-shadow-[0_-12px_16px_#111]',
               'contrast-more:nx-border-neutral-400 contrast-more:nx-shadow-none contrast-more:dark:nx-shadow-none',
               showSidebar
-                ? [hasI18n && 'nx-justify-end']
+                ? cn(hasI18n && 'nx-justify-end', 'nx-border-t')
                 : 'nx-py-4 nx-flex-wrap nx-justify-center'
             )}
+            data-toggle-animation={
+              showToggleAnimation ? (showSidebar ? 'show' : 'hide') : 'off'
+            }
           >
             {hasI18n && (
               <LocaleSwitch
                 options={config.i18n}
                 lite={!showSidebar}
-                className={showSidebar ? 'nx-grow' : 'max-md:nx-grow'}
+                className={cn(showSidebar ? 'nx-grow' : 'max-md:nx-grow')}
               />
             )}
             {config.darkMode && <ThemeSwitch lite={!showSidebar || hasI18n} />}
@@ -478,7 +484,10 @@ export function Sidebar({
               <button
                 title={showSidebar ? 'Hide sidebar' : 'Show sidebar'}
                 className="max-md:nx-hidden nx-h-7 nx-rounded-md nx-transition-colors nx-text-gray-600 dark:nx-text-gray-400 nx-px-2 hover:nx-bg-gray-100 hover:nx-text-gray-900 dark:hover:nx-bg-primary-100/5 dark:hover:nx-text-gray-50"
-                onClick={() => setSidebar(!showSidebar)}
+                onClick={() => {
+                  setSidebar(!showSidebar)
+                  setToggleAnimation(true)
+                }}
               >
                 <ExpandIcon isOpen={showSidebar} />
               </button>

@@ -61,9 +61,6 @@ exports[`Page Process > pageMap en-US 1`] = `
           "type": "page",
         },
         "docs": {
-          "theme": {
-            "toc": true,
-          },
           "title": "Docs",
           "type": "page",
         },
@@ -86,9 +83,11 @@ exports[`Page Process > pageMap en-US 1`] = `
           "type": "page",
         },
         "remote": {
-          "display": "children",
-          "href": "/remote/foo",
+          "href": "/remote/4423220",
           "title": "Remote",
+          "type": "page",
+        },
+        "test": {
           "type": "page",
         },
       },
@@ -104,7 +103,6 @@ exports[`Page Process > pageMap en-US 1`] = `
               "theme": {
                 "layout": "raw",
               },
-              "title": "A Page",
               "type": "page",
             },
             "acknowledgement": "🧩 Acknowledgement",
@@ -130,10 +128,6 @@ exports[`Page Process > pageMap en-US 1`] = `
           "locale": "en-US",
           "name": "team",
           "route": "/about/team",
-        },
-        {
-          "data": {},
-          "kind": "Meta",
         },
       ],
       "kind": "Folder",
@@ -163,10 +157,6 @@ exports[`Page Process > pageMap en-US 1`] = `
           "locale": "en-US",
           "name": "swr-v1",
           "route": "/blog/swr-v1",
-        },
-        {
-          "data": {},
-          "kind": "Meta",
         },
       ],
       "kind": "Folder",
@@ -201,43 +191,37 @@ exports[`Page Process > pageMap en-US 1`] = `
               "type": "separator",
             },
             "404-500": "404/500 Custom Error Pages",
-            "advanced": {
-              "title": "Advanced",
-            },
-            "arguments": "Arguments",
+            "advanced": {},
+            "arguments": {},
             "change-log": {
               "theme": {
                 "sidebar": false,
               },
-              "title": "Change Log",
             },
             "conditional-fetching": "Conditional Data Fetching",
-            "data-fetching": "Data Fetching",
+            "data-fetching": {},
             "error-handling": {
               "display": "hidden",
-              "title": "Error Handling",
             },
-            "getting-started": "Getting Started",
+            "getting-started": {},
             "github_link": {
               "href": "https://github.com/shuding/nextra",
               "newWindow": true,
               "title": "GitHub 🐙 →",
-              "type": "page",
             },
-            "global-configuration": "Global Configuration",
-            "middleware": "Middleware",
-            "mutation": "Mutation",
-            "options": "Options",
-            "pagination": "Pagination",
-            "prefetching": "Prefetching",
+            "global-configuration": {},
+            "middleware": {},
+            "mutation": {},
+            "options": {},
+            "pagination": {},
+            "prefetching": {},
             "raw-layout": {
               "theme": {
                 "layout": "raw",
               },
-              "title": "Raw Layout",
             },
             "revalidation": "Auto Revalidation",
-            "suspense": "Suspense",
+            "suspense": {},
             "typescript": "TypeScript :)",
             "with-nextjs": "Next.js SSG and SSR",
             "wrap-toc-items": "Wrap Table of Content Items",
@@ -279,14 +263,20 @@ exports[`Page Process > pageMap en-US 1`] = `
             {
               "kind": "MdxPage",
               "locale": "en-US",
+              "name": "dynamic-markdown-import",
+              "route": "/docs/advanced/dynamic-markdown-import",
+            },
+            {
+              "kind": "MdxPage",
+              "locale": "en-US",
               "name": "file-name.with.DOTS",
               "route": "/docs/advanced/file-name.with.DOTS",
             },
             {
               "kind": "MdxPage",
               "locale": "en-US",
-              "name": "future-image",
-              "route": "/docs/advanced/future-image",
+              "name": "images",
+              "route": "/docs/advanced/images",
             },
             {
               "kind": "MdxPage",
@@ -322,18 +312,10 @@ exports[`Page Process > pageMap en-US 1`] = `
                       "name": "two",
                       "route": "/docs/advanced/more/tree/two",
                     },
-                    {
-                      "data": {},
-                      "kind": "Meta",
-                    },
                   ],
                   "kind": "Folder",
                   "name": "tree",
                   "route": "/docs/advanced/more/tree",
-                },
-                {
-                  "data": {},
-                  "kind": "Meta",
                 },
               ],
               "kind": "Folder",
@@ -351,10 +333,6 @@ exports[`Page Process > pageMap en-US 1`] = `
               "locale": "en-US",
               "name": "react-native",
               "route": "/docs/advanced/react-native",
-            },
-            {
-              "data": {},
-              "kind": "Meta",
             },
           ],
           "kind": "Folder",
@@ -493,10 +471,6 @@ exports[`Page Process > pageMap en-US 1`] = `
           "name": "wrap-toc-items",
           "route": "/docs/wrap-toc-items",
         },
-        {
-          "data": {},
-          "kind": "Meta",
-        },
       ],
       "kind": "Folder",
       "name": "docs",
@@ -508,14 +482,13 @@ exports[`Page Process > pageMap en-US 1`] = `
           "data": {
             "auth": "Authentication",
             "basic": "Basic Usage",
-            "error-handling": "Error Handling",
+            "error-handling": {},
             "full": {
               "theme": {
                 "layout": "raw",
               },
-              "title": "Full",
             },
-            "infinite-loading": "Infinite Loading",
+            "infinite-loading": {},
             "ssr": "Next.js SSR",
           },
           "kind": "Meta",
@@ -577,10 +550,6 @@ exports[`Page Process > pageMap en-US 1`] = `
           "name": "ssr",
           "route": "/examples/ssr",
         },
-        {
-          "data": {},
-          "kind": "Meta",
-        },
       ],
       "kind": "Folder",
       "name": "examples",
@@ -601,11 +570,28 @@ exports[`Page Process > pageMap en-US 1`] = `
         {
           "data": {},
           "kind": "Meta",
-          "locale": "en-US",
         },
         {
-          "data": {},
-          "kind": "Meta",
+          "children": [
+            {
+              "data": {},
+              "kind": "Meta",
+            },
+          ],
+          "kind": "Folder",
+          "name": "graphql-eslint",
+          "route": "/remote/graphql-eslint",
+        },
+        {
+          "children": [
+            {
+              "data": {},
+              "kind": "Meta",
+            },
+          ],
+          "kind": "Folder",
+          "name": "graphql-yoga",
+          "route": "/remote/graphql-yoga",
         },
       ],
       "kind": "Folder",
@@ -622,10 +608,6 @@ exports[`Page Process > pageMap en-US 1`] = `
       "locale": "en-US",
       "name": "test",
       "route": "/test",
-    },
-    {
-      "data": {},
-      "kind": "Meta",
     },
   ],
   "/docs/data-fetching",
@@ -661,8 +643,19 @@ exports[`Page Process > pageMap ru 1`] = `
     {
       "children": [
         {
-          "data": {},
+          "data": {
+            "a-page": {
+              "display": "hidden",
+              "theme": {
+                "layout": "raw",
+              },
+              "type": "page",
+            },
+            "acknowledgement": "🧩 Acknowledgement",
+            "team": "👥 Team",
+          },
           "kind": "Meta",
+          "locale": "en-US",
         },
         {
           "kind": "MdxPage",
@@ -783,10 +776,6 @@ exports[`Page Process > pageMap ru 1`] = `
                       "name": "two",
                       "route": "/docs/advanced/more/tree/two",
                     },
-                    {
-                      "data": {},
-                      "kind": "Meta",
-                    },
                   ],
                   "kind": "Folder",
                   "name": "tree",
@@ -797,10 +786,6 @@ exports[`Page Process > pageMap ru 1`] = `
                   "locale": "en-US",
                   "name": "loooooooooooooooooooong-title",
                   "route": "/docs/advanced/more/loooooooooooooooooooong-title",
-                },
-                {
-                  "data": {},
-                  "kind": "Meta",
                 },
               ],
               "kind": "Folder",
@@ -828,8 +813,14 @@ exports[`Page Process > pageMap ru 1`] = `
             {
               "kind": "MdxPage",
               "locale": "en-US",
-              "name": "future-image",
-              "route": "/docs/advanced/future-image",
+              "name": "dynamic-markdown-import",
+              "route": "/docs/advanced/dynamic-markdown-import",
+            },
+            {
+              "kind": "MdxPage",
+              "locale": "en-US",
+              "name": "images",
+              "route": "/docs/advanced/images",
             },
             {
               "kind": "MdxPage",
@@ -1070,6 +1061,28 @@ exports[`Page Process > pageMap ru 1`] = `
     },
     {
       "children": [
+        {
+          "children": [
+            {
+              "data": {},
+              "kind": "Meta",
+            },
+          ],
+          "kind": "Folder",
+          "name": "graphql-eslint",
+          "route": "/remote/graphql-eslint",
+        },
+        {
+          "children": [
+            {
+              "data": {},
+              "kind": "Meta",
+            },
+          ],
+          "kind": "Folder",
+          "name": "graphql-yoga",
+          "route": "/remote/graphql-yoga",
+        },
         {
           "data": {},
           "kind": "Meta",
